@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { CartResult, ProductResult } from "./schemas";
+import { CartResult, CollectionResult, ProductResult } from "./schemas";
 import { config } from "./config";
 import {
   ProductsQuery,
   ProductByHandleQuery,
+  CollectionByHandleQuery,
   CreateCartMutation,
   AddCartLinesMutation,
   GetCartQuery,
@@ -128,6 +129,46 @@ export const getProductRecommendations = async (options: {
   const parsedProducts = ProductsResult.parse(productRecommendations);
 
   return parsedProducts;
+};
+
+// Get a collection by its handle (slug) and return the collection with its products.
+// Returns null only if the collection does not exist. An existing collection is
+// returned even with 0 published products, so its image/links can still drive a
+// banner or category tile. Carousels gate on product count separately (see hasRow).
+export const getCollectionByHandle = async (options: {
+  handle: string;
+  limit?: number;
+  buyerIP: string;
+}) => {
+  const { handle, limit = 12, buyerIP } = options;
+
+  const data = await makeShopifyRequest(
+    CollectionByHandleQuery,
+    { handle, first: limit },
+    buyerIP
+  );
+  const { collection } = data;
+
+  // Collection not found — caller can use this to auto-skip the section
+  if (!collection) {
+    return null;
+  }
+
+  const parsedCollection = CollectionResult.parse(collection);
+
+  if (!parsedCollection) {
+    return null;
+  }
+
+  // Filter out any null product nodes returned by the API
+  const cleanNodes = parsedCollection.products.nodes.filter(
+    (node): node is NonNullable<typeof node> => node !== null
+  );
+
+  return {
+    ...parsedCollection,
+    products: { nodes: cleanNodes },
+  };
 };
 
 // Create a cart and add a line item to it and return the cart object

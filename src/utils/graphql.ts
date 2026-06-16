@@ -113,6 +113,29 @@ export const ProductRecommendationsQuery = `#graphql
   ${PRODUCT_FRAGMENT}
 `;
 
+export const CollectionByHandleQuery = `#graphql
+  query ($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      description
+      image {
+        url
+        width
+        height
+        altText
+      }
+      products(first: $first) {
+        nodes {
+          ...productFragment
+        }
+      }
+    }
+  }
+  ${PRODUCT_FRAGMENT}
+`;
+
 export const GetCartQuery = `#graphql
   query ($id: ID!) {
     cart(id: $id) {

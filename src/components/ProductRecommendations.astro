@@ -16,13 +16,14 @@ const productRecommendations = await getProductRecommendations({
 
 {
   productRecommendations.length > 0 && (
-    <section class="bg-white">
-      <div class="py-16 sm:py-24">
-        <h2 class="text-2xl font-bold tracking-tight text-gray-900">
-          Customers also purchased
-        </h2>
-
-        <div class="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+    <section class="border-t border-line py-12 sm:py-16">
+      <div class="mb-5 flex items-center justify-between px-6 md:px-8">
+        <p class="nav-label text-muted">You May Also Like</p>
+        <a href="/collections/shop-all" class="nav-label text-ink underline underline-offset-4">Shop All</a>
+      </div>
+      <div class="px-6 md:px-8">
+        <h2 class="sr-only">Customers also purchased</h2>
+        <div class="grid grid-cols-2 gap-x-1 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
           {productRecommendations.map((product) => (
             <ProductCard product={product} />
           ))}

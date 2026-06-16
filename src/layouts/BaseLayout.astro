@@ -3,16 +3,25 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CartDrawer from "../components/CartDrawer.svelte";
 import AnnouncementBar from "../components/AnnouncementBar.astro";
+import "@fontsource-variable/archivo";
+import "@fontsource-variable/inter";
+import "../styles/global.css";
 
 export interface Props {
   title: string;
   description?: string;
+  /** Pass true on pages that don't have a dark hero (e.g. product, blog, legal pages).
+   *  Header will always render in solid bg-paper/ink state instead of transparent-over-hero. */
+  solidHeader?: boolean;
 }
 
 const defaultDesc =
   "A lightweight and minimalit Astro starter theme using Shopify with Svelte, Tailwind, and TypeScript.";
 
-const { title, description = defaultDesc } = Astro.props as Props;
+const { title, description = defaultDesc, solidHeader = false } = Astro.props as Props;
+
+// GTM is entirely dormant when PUBLIC_GTM_ID is unset or empty.
+const gtmId = import.meta.env.PUBLIC_GTM_ID;
 ---
 
 <html lang="en">
@@ -23,14 +32,42 @@ const { title, description = defaultDesc } = Astro.props as Props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <style is:global>
-      @import "../styles/global.css";
-    </style>
+
+    {/* dataLayer initialisation — MUST come before the GTM snippet to avoid race conditions */}
+    <script>window.dataLayer = window.dataLayer || [];</script>
+
+    {/* GTM container snippet — only injected when PUBLIC_GTM_ID is set */}
+    {gtmId && (
+      <script define:vars={{ gtmId }}>
+        (function(w,d,s,l,i){
+          w[l]=w[l]||[];
+          w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+          var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),
+              dl=l!='dataLayer'?'&l='+l:'';
+          j.async=true;
+          j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+          f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer',gtmId);
+      </script>
+    )}
   </head>
   <body>
+    {/* GTM noscript fallback — only injected when PUBLIC_GTM_ID is set */}
+    {gtmId && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden"
+        ></iframe>
+      </noscript>
+    )}
+
     <AnnouncementBar />
     <CartDrawer client:idle />
-    <Header />
+    <Header solidFromTop={solidHeader} />
     <main>
       <slot />
     </main>

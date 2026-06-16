@@ -1,0 +1,114 @@
+---
+/**
+ * CategoryGrid.astro — 2x2 image category tiles
+ *
+ * Renders a 2-column grid of portrait tiles, each linking to a collection.
+ * Images use aspect-[4/5] object-cover with a subtle hover scale.
+ * When no image is provided, renders an ink placeholder block.
+ *
+ * Bottom-left label over a scrim per tile.
+ *
+ * Design tokens: ink, paper, font-display, .nav-label,
+ *   --ease-standard, --duration-standard.
+ */
+
+export interface CategoryTile {
+  image?: { url: string; alt?: string };
+  label: string;
+  href: string;
+}
+
+export interface Props {
+  tiles: CategoryTile[]; // typically 4
+}
+
+const { tiles } = Astro.props as Props;
+---
+
+<div class="grid grid-cols-2 gap-1">
+
+  {tiles.map((tile) => (
+    <a
+      href={tile.href}
+      class="group relative block overflow-hidden"
+      aria-label={tile.label}
+    >
+
+      <!-- Image or placeholder, portrait aspect -->
+      <div class="aspect-[4/5] w-full overflow-hidden">
+
+        {tile.image?.url ? (
+          <img
+            src={tile.image.url}
+            alt={tile.image.alt ?? tile.label}
+            class="h-full w-full object-cover transition-transform"
+            style={`
+              transition-duration: var(--duration-standard);
+              transition-timing-function: var(--ease-standard);
+            `}
+            loading="lazy"
+          />
+        ) : (
+          /* Placeholder ink block when no image is provided */
+          <div
+            class="h-full w-full"
+            style="
+              background-color: var(--color-ink);
+              background-image: radial-gradient(
+                ellipse 80% 60% at 50% 100%,
+                color-mix(in srgb, var(--color-ember) 8%, transparent) 0%,
+                transparent 60%
+              );
+            "
+            aria-hidden="true"
+          ></div>
+        )}
+
+      </div>
+
+      <!-- Image zoom on hover (only when image exists) -->
+      {tile.image?.url && (
+        <style>{`
+          a:hover .category-img {
+            transform: scale(1.03);
+          }
+        `}</style>
+      )}
+
+      <!-- Bottom scrim for label legibility -->
+      <div
+        class="pointer-events-none absolute inset-0"
+        style="background: linear-gradient(to top, rgba(10,10,10,0.65) 0%, rgba(10,10,10,0.05) 40%, transparent 55%);"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Label -->
+      <p
+        class="nav-label absolute bottom-0 left-0 p-4 uppercase text-paper"
+        aria-hidden="true"
+      >
+        {tile.label}
+      </p>
+
+    </a>
+  ))}
+
+</div>
+
+<style>
+  /*
+   * Group-hover scale applied via CSS since Tailwind group-hover:scale
+   * targets a class inside the group parent.
+   */
+  a:hover img {
+    transform: scale(1.03);
+    transition-duration: var(--duration-standard);
+    transition-timing-function: var(--ease-standard);
+  }
+  a img {
+    transition-property: transform;
+    transition-duration: var(--duration-standard);
+    transition-timing-function: var(--ease-standard);
+    will-change: transform;
+  }
+</style>

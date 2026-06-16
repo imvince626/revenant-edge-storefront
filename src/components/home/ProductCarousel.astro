@@ -1,0 +1,189 @@
+---
+/**
+ * ProductCarousel.astro — horizontal scroll-snap product row
+ *
+ * Shows a labelled heading, a scroll-snap carousel of ProductCard tiles
+ * (~1.4 visible on mobile, ~4-5 on desktop), and an optional CTA link.
+ *
+ * Each card slot renders ProductCard with a sibling "+" quick-view link
+ * anchored top-right. The quick-view is a sibling <a>, never nested inside
+ * ProductCard's own <a> wrapper.
+ *
+ * Analytics: no per-carousel data-islands to avoid duplicate DOM ids across
+ * multiple carousel instances on one page.
+ * TODO: per-carousel view_item_list analytics
+ *
+ * Design tokens: font-display, font-sans, .nav-label, --color-ink, --color-paper,
+ *   --color-muted, --ease-standard, --duration-standard.
+ */
+
+import type { z } from "zod";
+import type { ProductResult } from "../../utils/schemas";
+import ProductFamilyCard from "./ProductFamilyCard.svelte";
+
+export interface Props {
+  heading?: string;     // small eyebrow label above the row (.nav-label text-muted)
+  products: z.infer<typeof ProductResult>[];
+  ctaLabel?: string;    // e.g. "Shop New Arrivals"
+  ctaHref?: string;     // collection url
+}
+
+const { heading, products, ctaLabel, ctaHref } = Astro.props as Props;
+
+const COLOR_SWATCHES: Record<string, string> = {
+  ash: "#D3D3D3",
+  black: "#0A0A0A",
+  blue: "#2747B8",
+  bone: "#D8D1C4",
+  charcoal: "#4D4D52",
+  cobalt: "#2747B8",
+  cream: "#E8E1D2",
+  gray: "#A7ABB1",
+  grey: "#A7ABB1",
+  ivory: "#EEE8DA",
+  midnight: "#171A25",
+  mushroom: "#B9AC9B",
+  natural: "#D8D1C4",
+  navy: "#1D2B4F",
+  red: "#D33A2C",
+  sand: "#C8BBA9",
+  storm: "#777D88",
+  white: "#FFFFFF",
+};
+
+const COLOR_NAMES = Object.keys(COLOR_SWATCHES).sort((a, b) => b.length - a.length);
+
+function colorFromText(text: string) {
+  const source = text.toLowerCase();
+  for (const color of COLOR_NAMES) {
+    const pattern = new RegExp(`(^|[^a-z])${color}([^a-z]|$)`, "i");
+    if (pattern.test(source)) {
+      return {
+        color: color[0].toUpperCase() + color.slice(1),
+        swatch: COLOR_SWATCHES[color],
+      };
+    }
+  }
+
+  return null;
+}
+
+function titleParts(product: NonNullable<z.infer<typeof ProductResult>>) {
+  const title = product.title;
+  const cleanTitle = title.trim().replace(/\s+/g, " ");
+  for (const color of COLOR_NAMES) {
+    const pattern = new RegExp(`(?:\\s+|\\s*-\\s*)(${color})$`, "i");
+    if (pattern.test(cleanTitle)) {
+      return {
+        baseTitle: cleanTitle.replace(pattern, "").trim(),
+        color: color[0].toUpperCase() + color.slice(1),
+        swatch: COLOR_SWATCHES[color],
+      };
+    }
+  }
+
+  const imageText = [
+    product.featuredImage?.altText,
+    product.featuredImage?.url,
+    product.images?.nodes?.[0]?.altText,
+    product.images?.nodes?.[0]?.url,
+  ].filter(Boolean).join(" ");
+  const imageColor = colorFromText(imageText);
+
+  return {
+    baseTitle: cleanTitle,
+    color: imageColor?.color ?? "Colorway",
+    swatch: imageColor?.swatch ?? "var(--color-ink)",
+  };
+}
+
+const families = Array.from(
+  products.filter(Boolean).reduce((map, product) => {
+    const parts = titleParts(product);
+    const key = parts.baseTitle.toLowerCase();
+    const current = map.get(key) ?? {
+      title: parts.baseTitle,
+      colorways: [],
+    };
+
+    current.colorways.push({
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
+      color: parts.color,
+      swatch: parts.swatch,
+      image: product.featuredImage ?? product.images?.nodes?.[0] ?? null,
+      hoverImage: product.images?.nodes?.[1] ?? null,
+      price: product.variants.nodes[0].price,
+    });
+
+    map.set(key, current);
+    return map;
+  }, new Map<string, { title: string; colorways: any[] }>())
+).map(([, family]) => family);
+---
+
+<section class="py-12 sm:py-16">
+
+  <!-- ── Heading row ─────────────────────────────────────────────────────── -->
+  {heading && (
+    <div class="mb-4 px-6 md:px-8">
+      <p class="nav-label" style="color: var(--color-muted);">{heading}</p>
+    </div>
+  )}
+
+  <!-- ── Scroll container ────────────────────────────────────────────────── -->
+  <!--
+    no-scrollbar: hides the native scrollbar (cross-browser).
+    scroll-px-* keeps the snap alignment flush with the horizontal padding.
+  -->
+  <div
+    class="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-6 px-6 md:scroll-px-8 md:px-8"
+    role="list"
+    aria-label={heading ?? "Products"}
+  >
+
+    {families.map((family) => (
+      <div
+        class="relative snap-start shrink-0 basis-[72%] border-r border-line pr-2 sm:basis-[44%] md:basis-[31%] lg:basis-[24%]"
+        role="listitem"
+      >
+        <ProductFamilyCard client:load title={family.title} colorways={family.colorways} />
+      </div>
+    ))}
+
+  </div>
+
+  <!-- ── CTA row ─────────────────────────────────────────────────────────── -->
+  {ctaLabel && ctaHref && (
+    <div class="mt-6 flex justify-center px-6 md:px-8">
+      <a
+        href={ctaHref}
+        class="nav-label group inline-flex items-center gap-2 border-t border-b border-ink px-8 py-2 uppercase"
+        style="color: var(--color-ink);"
+      >
+        <span aria-hidden="true">→</span>
+        <span
+          class="underline-offset-4"
+          style="
+            text-decoration-line: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+            text-decoration-color: transparent;
+            transition: text-decoration-color var(--duration-standard) var(--ease-standard);
+          "
+        >
+          {ctaLabel}
+        </span>
+      </a>
+    </div>
+  )}
+
+</section>
+
+<style>
+  /* CTA underline reveal on hover */
+  a[href]:hover span[style*="text-decoration-color"] {
+    text-decoration-color: currentColor;
+  }
+</style>

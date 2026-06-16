@@ -1,0 +1,223 @@
+---
+/**
+ * HeroFullBleed.astro — Revenant Edge full-bleed editorial hero
+ *
+ * Edge-to-edge section with looping background video, a dark scrim, and
+ * overlaid eyebrow/title/subtitle/CTAs. Positioning follows the `align` prop:
+ *   "center"      — content centred horizontally and vertically
+ *   "bottom-left" — content anchored bottom-left (REPRESENT-style)
+ *
+ * Video: /hero-loop.webm + /hero-loop.mp4, poster /hero-loop-poster.jpg
+ * Reduced-motion: video hidden, poster shown.
+ * The transparent header renders over this section unchanged.
+ *
+ * Design tokens: ink, paper, ember, font-display, font-sans, .nav-label,
+ *   --ease-standard, --duration-standard, --color-ember, --color-ink, --color-paper,
+ *   --color-muted.
+ */
+
+export interface HeroCta {
+  label: string;
+  href: string;
+  variant?: "solid" | "outline";
+}
+
+export interface Props {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  ctas?: HeroCta[];
+  align?: "center" | "bottom-left"; // default "center"
+}
+
+const {
+  eyebrow,
+  title,
+  subtitle,
+  ctas = [],
+  align = "center",
+} = Astro.props as Props;
+
+const isCenter = align === "center";
+---
+
+<section
+  class="herofb relative w-full overflow-hidden bg-ink"
+  style="min-height: min(92vh, 900px);"
+  aria-label="Hero"
+>
+
+  <!-- ── BACKGROUND VIDEO ────────────────────────────────────────────────── -->
+  <!-- aria-hidden: purely decorative; poster conveys the still frame -->
+  <style>
+    @media (prefers-reduced-motion: reduce) {
+      .herofb-video  { display: none !important; }
+      .herofb-poster { display: block !important; }
+    }
+  </style>
+
+  <video
+    class="herofb-video absolute inset-0 h-full w-full object-cover"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    poster="/hero-loop-poster.jpg"
+    aria-hidden="true"
+  >
+    <source src="/hero-loop.webm" type="video/webm" />
+    <source src="/hero-loop.mp4"  type="video/mp4" />
+  </video>
+
+  <!-- Poster fallback for reduced-motion (hidden by default) -->
+  <img
+    src="/hero-loop-poster.jpg"
+    alt=""
+    class="herofb-poster hidden absolute inset-0 h-full w-full object-cover"
+    aria-hidden="true"
+  />
+
+  <!-- ── DARK SCRIM (keeps paper text legible) ───────────────────────────── -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style="background-color: color-mix(in srgb, var(--color-ink) 45%, transparent);"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ── CONTENT ─────────────────────────────────────────────────────────── -->
+  <div
+    class:list={[
+      "relative z-10 flex h-full w-full",
+      isCenter
+        ? "items-center justify-center text-center"
+        : "items-end justify-start",
+    ]}
+    style="min-height: inherit;"
+  >
+    <div
+      class:list={[
+        isCenter
+          ? "flex flex-col items-center px-6 py-20"
+          : "flex flex-col items-start px-6 pb-12 md:px-12 md:pb-16",
+      ]}
+      style="max-width: 72ch;"
+    >
+
+      <!-- Eyebrow -->
+      {eyebrow && (
+        <p
+          class="nav-label mb-5"
+          style="color: var(--color-ember);"
+        >
+          {eyebrow}
+        </p>
+      )}
+
+      <!-- Title -->
+      {title && (
+        <h1
+          class="font-display m-0 font-bold uppercase text-paper"
+          style={`
+            font-size: clamp(2.75rem, 6vw, 6rem);
+            letter-spacing: -0.03em;
+            line-height: 1.0;
+          `}
+        >
+          {title}
+        </h1>
+      )}
+
+      <!-- Subtitle -->
+      {subtitle && (
+        <p
+          class="font-sans mt-6"
+          style={`
+            color: rgba(255,255,255,0.70);
+            font-size: clamp(0.95rem, 1.5vw, 1.125rem);
+            line-height: 1.6;
+            max-width: 48ch;
+          `}
+        >
+          {subtitle}
+        </p>
+      )}
+
+      <!-- CTAs -->
+      {ctas.length > 0 && (
+        <div class:list={["mt-8 flex flex-wrap gap-4", isCenter ? "justify-center" : ""]}>
+          {ctas.map((cta) =>
+            cta.variant === "outline" ? (
+              <a
+                href={cta.href}
+                style={`
+                  font-family: var(--font-display);
+                  color: var(--color-paper);
+                  border: 1px solid var(--color-muted);
+                  transition:
+                    border-color var(--duration-standard) var(--ease-standard),
+                    color var(--duration-standard) var(--ease-standard);
+                `}
+                class="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-widest hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+              >
+                {cta.label}
+              </a>
+            ) : (
+              <a
+                href={cta.href}
+                style={`
+                  font-family: var(--font-display);
+                  color: var(--color-ink);
+                  background-color: var(--color-paper);
+                  transition: opacity var(--duration-standard) var(--ease-standard);
+                `}
+                class="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-widest hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+              >
+                {cta.label}
+              </a>
+            )
+          )}
+        </div>
+      )}
+
+    </div>
+  </div><!-- /content -->
+
+</section>
+
+<script>
+  // Robust autoplay: muted autoplay may be deferred by browser policy.
+  // Pause when scrolled out of view to save CPU/battery.
+  (function () {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const vids = Array.from(document.querySelectorAll(".herofb-video"));
+    if (!vids.length) return;
+
+    function tryPlay(v: Element) {
+      if (reduce.matches) return;
+      const vid = v as HTMLVideoElement;
+      const p = vid.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    }
+
+    vids.forEach((v) => {
+      const vid = v as HTMLVideoElement;
+      if (vid.readyState >= 2) tryPlay(v);
+      else vid.addEventListener("canplay", () => tryPlay(v), { once: true });
+    });
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (reduce.matches) return;
+            if (e.isIntersecting) tryPlay(e.target);
+            else (e.target as HTMLVideoElement).pause();
+          });
+        },
+        { threshold: 0.1 }
+      );
+      vids.forEach((v) => io.observe(v));
+    }
+  })();
+</script>

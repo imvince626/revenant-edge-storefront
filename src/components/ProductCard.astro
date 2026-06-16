@@ -2,61 +2,97 @@
 import type { z } from "zod";
 import type { ProductResult } from "../utils/schemas";
 
-import ShopifyImage from "./ShopifyImage.svelte";
 import Money from "./Money.svelte";
 
 export interface Props {
   product: z.infer<typeof ProductResult>;
 }
 const { product } = Astro.props as Props;
+
+const primaryImage = product?.featuredImage ?? product?.images?.nodes?.[0] ?? null;
+const secondaryImage = product?.images?.nodes?.[1] ?? null;
+const hasSwap = !!secondaryImage;
+
+// Build Shopify-optimised src for a given image + width
+function imgSrc(url: string, width: number) {
+  return `${url}&width=${width}`;
+}
 ---
 
 <a
   href={`/products/${product?.handle}`}
-  class="group overflow-hidden rounded-lg border-l-orange-100 shadow hover:shadow-md"
+  aria-label={`View ${product?.title}`}
+  class="product-card group block"
 >
-  <div class="relative">
-    <ShopifyImage
-      classList=""
-      loading="eager"
-      image={product?.featuredImage}
-      sizes={`
-      (min-width: 1540px) 348px,
-      (min-width: 1280px) 284px,
-      (min-width: 1040px) 309px,
-      (min-width: 780px) 348px,
-      (min-width: 640px) 284px,
-      calc(100vw - 48px)
-    `}
-    />
-    <div
-      class="absolute inset-0 z-10 grid items-end justify-items-center opacity-0 transition-all group-hover:bg-black/10 group-hover:opacity-100"
-    >
-      <button class="button w-full gap-3 rounded-none">
-        <span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="h-5 w-5"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-            ></path>
-          </svg>
-        </span>
-        Shop now
-      </button>
-    </div>
+  {/* ── Image block ── */}
+  <div class="product-card__image-wrap relative aspect-[187/251] overflow-hidden bg-surface outline outline-1 outline-line transition-all duration-[280ms] group-hover:z-10 group-hover:outline-ink">
+
+    {/* Primary image — always visible, fades out on hover when swap exists */}
+    {primaryImage && (
+      <img
+        src={imgSrc(primaryImage.url, 800)}
+        alt={primaryImage.altText || product?.title || "Product image"}
+        width={primaryImage.width}
+        height={primaryImage.height}
+        loading="eager"
+        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        srcset={[450, 600, 800, 1000].map(w => `${imgSrc(primaryImage.url, w)} ${w}w`).join(", ")}
+        class:list={[
+          "product-card__img product-card__img--primary",
+          "absolute inset-0 w-full h-full object-cover",
+          "transition-opacity duration-[280ms]",
+          hasSwap
+            ? "group-hover:opacity-0"
+            : "group-hover:scale-[1.02] transition-transform",
+        ]}
+        style={`transition-timing-function: var(--ease-standard);`}
+      />
+    )}
+
+    {/* Secondary image — hidden until hover (only rendered when it exists) */}
+    {hasSwap && secondaryImage && (
+      <img
+        src={imgSrc(secondaryImage.url, 800)}
+        alt={secondaryImage.altText || `${product?.title} — alternate view`}
+        width={secondaryImage.width}
+        height={secondaryImage.height}
+        loading="lazy"
+        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        srcset={[450, 600, 800, 1000].map(w => `${imgSrc(secondaryImage.url, w)} ${w}w`).join(", ")}
+        class="product-card__img product-card__img--secondary
+               absolute inset-0 w-full h-full object-cover
+               opacity-0 group-hover:opacity-100
+               transition-opacity duration-[280ms]"
+        style="transition-timing-function: var(--ease-standard);"
+      />
+    )}
   </div>
-  <div class="flex justify-between py-6 px-5 text-zinc-700">
-    <h3 class="group-hover:underline">{product?.title}</h3>
-    <p class="font-bold">
+
+  {/* ── Text block ── */}
+  <div class="product-card__meta flex items-start justify-between gap-3 px-0 pt-3 pb-1">
+    <h3
+      class="product-card__title
+             font-sans text-[12px] leading-snug text-ink
+             normal-case font-normal"
+    >
+      {product?.title}
+    </h3>
+    <p class="product-card__price shrink-0 font-sans text-[12px] leading-snug text-muted">
       <Money price={product?.variants.nodes[0].price} />
     </p>
   </div>
 </a>
+
+<style>
+  /*
+   * GPU-friendly transform for the single-image zoom fallback.
+   * The group-hover:scale class applies via Tailwind but we need
+   * will-change to keep it composited.
+   */
+  .product-card__img--primary {
+    will-change: transform, opacity;
+  }
+  .product-card__img--secondary {
+    will-change: opacity;
+  }
+</style>

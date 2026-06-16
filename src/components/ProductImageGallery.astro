@@ -11,56 +11,22 @@ export interface Props {
   images: z.infer<typeof ImagesResult>;
 }
 const { images } = Astro.props as Props;
+
+const allImages = images.nodes.filter(Boolean);
+const galleryImages = allImages.length > 0 ? allImages : [null];
 ---
 
-<div class="grid gap-4 md:grid-cols-8 lg:gap-6">
-  <div class="md:order-2 md:col-span-6">
-    <ShopifyImage
-      classList="overflow-hidden rounded-lg h-full object-cover"
-      loading="eager"
-      image={images.nodes[0]}
-      sizes={`
-          (min-width: 1540px) 475px,
-          (min-width: 1280px) 389px,
-          (min-width: 1040px) 304px,
-          (min-width: 780px) 720px,
-          (min-width: 680px) 592px,
-          calc(94.44vw - 31px)
-        `}
-    />
-  </div>
-  <div
-    class:list={[
-      "grid",
-      "grid-cols-4",
-      "gap-4",
-      "md:order-1",
-      "md:col-span-2",
-      "md:flex",
-      "md:flex-col",
-      "md:gap-6",
-      { "md:justify-between": images.nodes.length > 2 },
-    ]}
-  >
-    {
-      images.nodes.map((image, index) => {
-        if (index < 3) {
-          return (
-            <div class="overflow-hidden rounded-lg">
-              <ShopifyImage
-                classList=""
-                loading="eager"
-                image={image}
-                sizes={`
-                  (min-width: 1540px) 475px,
-                  (min-width: 1280px) 389px,
-                  304px
-                `}
-              />
-            </div>
-          );
-        }
-      })
-    }
-  </div>
+<div class="grid grid-cols-1 gap-1 md:grid-cols-2">
+  {galleryImages.map((image, index) => (
+    <div class:list={["bg-surface aspect-[3/4] w-full overflow-hidden", index === 0 && "md:col-span-2 md:aspect-[4/5] lg:col-span-1 lg:aspect-[3/4]"]}>
+      <ShopifyImage
+        classList="h-full w-full object-cover"
+        loading={index === 0 ? "eager" : "lazy"}
+        image={image}
+        sizes={index === 0
+          ? "(min-width: 1400px) 520px, (min-width: 1024px) 50vw, 100vw"
+          : "(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"}
+      />
+    </div>
+  ))}
 </div>

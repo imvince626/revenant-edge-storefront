@@ -12,15 +12,21 @@
 </script>
 
 <div>
-  <button class="relative" onclick={() => openCart()}>
+  <button
+    class="relative flex h-10 w-10 items-center justify-center text-current transition-opacity hover:opacity-60"
+    onclick={() => openCart()}
+    aria-label="Open your cart"
+  >
     <span class="sr-only">Open your cart</span>
+    <!-- Bag icon — inherits currentColor so it adapts to transparent/solid header states -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       stroke-width="1.5"
       stroke="currentColor"
-      class="w-7 h-7 sm:w-8 sm:h-8 pointer-events-none"
+      class="h-[22px] w-[22px] pointer-events-none"
+      aria-hidden="true"
     >
       <path
         stroke-linecap="round"
@@ -29,13 +35,12 @@
       />
     </svg>
     {#if $cart && $cart.totalQuantity > 0}
-      <div
-        class="absolute -right-2 -top-1 sm:-right-1 sm:top-0 bg-emerald-900 text-white text-[12px] rounded-full"
+      <span
+        class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ember text-[10px] font-semibold text-paper"
+        aria-label="{$cart.totalQuantity} items in cart"
       >
-        <span class="w-5 h-5 flex justify-center text-center items-center">
-          {$cart.totalQuantity}
-        </span>
-      </div>
+        {$cart.totalQuantity}
+      </span>
     {/if}
   </button>
 </div>

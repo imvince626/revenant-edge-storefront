@@ -6,16 +6,45 @@ import ProductCard from "./ProductCard.astro";
 const ProductsResult = z.array(ProductResult);
 export interface Props {
   products: z.infer<typeof ProductsResult>;
+  listName?: string;
 }
-const { products } = Astro.props as Props;
+const { products, listName = "Home" } = Astro.props as Props;
+
+// Serialise for the client-side analytics data island
+const analyticsProducts = JSON.stringify(products);
 ---
 
-<section>
-  <div class="container py-16 sm:py-20">
-    <h2 class="sr-only">Products</h2>
+<section class="py-12 sm:py-16">
+  <div class="mb-5 flex items-center justify-between px-6 md:px-8">
+    <p class="nav-label text-muted">Shop All</p>
+    <p class="font-sans text-xs text-muted">{products.length} styles</p>
+  </div>
 
-    <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
+  <div class="px-6 md:px-8">
+    <h2 class="sr-only">Products</h2>
+    <div class="grid grid-cols-2 gap-x-1 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => <ProductCard product={product} />)}
     </div>
   </div>
 </section>
+
+{/*
+  view_item_list — fires once after the grid renders.
+  Server data is embedded in JSON islands, then a Vite-processed module reads it.
+*/}
+<script type="application/json" id="__products_list_data__" set:html={analyticsProducts}></script>
+<script type="application/json" id="__products_list_name__" set:html={JSON.stringify(listName)}></script>
+<script>
+  import { trackViewItemList } from "../utils/analytics";
+  try {
+    const dataEl = document.getElementById("__products_list_data__");
+    const nameEl = document.getElementById("__products_list_name__");
+    if (dataEl && nameEl) {
+      const products = JSON.parse(dataEl.textContent || "[]");
+      const name = JSON.parse(nameEl.textContent || '"Home"');
+      trackViewItemList(name, products);
+    }
+  } catch (_) {
+    // parse failure — analytics non-blocking
+  }
+</script>

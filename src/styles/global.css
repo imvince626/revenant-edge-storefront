@@ -1,7 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* Animation */
+  /* ── Brand color tokens ── */
+  --color-ink: #0A0A0A;
+  --color-paper: #FFFFFF;
+  --color-muted: #6B6B6B;
+  --color-faint: #9A9A9A;
+  --color-line: #E5E5E5;
+  --color-surface: #F5F5F4;
+  --color-ember: #D33A2C;
+  --color-ember-700: #A82A20;
+
+  /* ── Brand font tokens ── */
+  --font-display: "Archivo Variable", system-ui, sans-serif;
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+
+  /* ── Animation ── */
   --animate-shake: shake 0.5s infinite;
 
   @keyframes shake {
@@ -41,9 +55,20 @@
   }
 }
 
+/* ── Motion custom props (exposed for JS/inline use, not Tailwind utilities) ── */
+:root {
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-standard: 280ms;
+}
+
 @utility container {
   margin-inline: auto;
   padding-inline: 1.5rem;
+}
+
+/* ── Scrollbar hiding utility ── */
+@utility no-scrollbar {
+  scrollbar-width: none;
 }
 
 @layer base {
@@ -51,13 +76,32 @@
     @apply scroll-smooth;
   }
 
+  /* ── Base body: brand fonts + ink/paper ── */
   body {
     @apply flex min-h-screen flex-col;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   main {
     @apply flex-1;
   }
+
+  /* ── Headings: Archivo Variable, tight tracking + leading ── */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.07;
+  }
+
+  h1 { font-size: clamp(2.25rem, 5vw, 4rem); }
+  h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); }
+  h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+  h4 { font-size: clamp(1.05rem, 2vw, 1.25rem); }
 
   details > summary {
     list-style: none;
@@ -69,15 +113,39 @@
   *,
   :before,
   :after {
-    @apply border-gray-200;
+    border-color: var(--color-line);
   }
 
+  /* ── .button: ink/paper solid — commerce components ── */
   .button {
-    @apply flex items-center justify-center rounded-lg;
-    @apply bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-600;
-    @apply px-8 py-3 text-base font-medium text-white;
-    @apply transition hover:opacity-80;
-    @apply focus:ring-2 focus:ring-black focus:ring-offset-1 focus:outline-none;
-    @apply disabled:cursor-not-allowed disabled:opacity-60;
+    @apply flex items-center justify-center;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    @apply px-8 py-4 text-sm font-semibold uppercase tracking-widest;
+    @apply transition hover:opacity-85;
+    @apply focus:ring-2 focus:ring-ink focus:ring-offset-2 focus:outline-none;
+    @apply disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  /* ── Nav / label utility class ── */
+  .nav-label {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* ── Hide webkit scrollbar for .no-scrollbar elements ── */
+  /* (@utility can't express pseudo-elements, so the webkit rule lives here) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Dark section helper ── */
+  .section-dark,
+  [data-theme="dark"] {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
   }
 }

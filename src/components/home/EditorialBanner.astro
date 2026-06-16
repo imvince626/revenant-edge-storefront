@@ -1,0 +1,238 @@
+---
+/**
+ * EditorialBanner.astro — full-bleed campaign band
+ *
+ * Accepts an image or video background via the `media` prop. When no media
+ * is provided, renders a placeholder ink block with an ember radial-gradient
+ * texture and a data-placeholder="true" attribute.
+ * IMAGE SLOT: drop campaign photo via props.media.src
+ *
+ * Alignment options: "center" | "bottom-center" | "bottom-left"
+ * Height options:    "tall" = min(85vh, 840px) | "medium" = min(60vh, 620px)
+ * Theme:             "light" (paper text, default) | "dark" (ink text)
+ *
+ * Design tokens: ink, paper, ember, font-display, font-sans, .nav-label,
+ *   .button, --ease-standard, --duration-standard.
+ */
+
+export interface BannerMedia {
+  type?: "image" | "video";
+  src?: string;
+  webm?: string;
+  mp4?: string;
+  poster?: string;
+  alt?: string;
+}
+
+export interface BannerCta {
+  label: string;
+  href: string;
+}
+
+export interface Props {
+  media?: BannerMedia;
+  eyebrow?: string;
+  title: string;
+  ctas?: BannerCta[];
+  align?: "center" | "bottom-center" | "bottom-left";
+  height?: "tall" | "medium";
+  theme?: "light" | "dark";
+}
+
+const {
+  media,
+  eyebrow,
+  title,
+  ctas = [],
+  align = "bottom-center",
+  height = "medium",
+  theme = "light",
+} = Astro.props as Props;
+
+const hasMedia = !!media?.src || (media?.type === "video" && (media?.webm || media?.mp4));
+const isVideo  = media?.type === "video";
+const isImage  = !isVideo && !!media?.src;
+
+const heightStyle =
+  height === "tall" ? "min(85vh, 840px)" : "min(60vh, 620px)";
+
+const textColor =
+  theme === "dark" ? "var(--color-ink)" : "var(--color-paper)";
+
+// Content position: flexbox alignment classes
+const alignClasses: Record<string, string> = {
+  "center":        "items-center justify-center text-center",
+  "bottom-center": "items-end justify-center text-center",
+  "bottom-left":   "items-end justify-start text-left",
+};
+const contentAlign = alignClasses[align] ?? alignClasses["bottom-center"];
+
+// Padding varies by position
+const paddingClass = align === "center"
+  ? "px-6 py-16 md:px-12"
+  : "px-6 pb-10 md:px-12 md:pb-14";
+---
+
+<!-- IMAGE SLOT: drop campaign photo via props.media.src -->
+<section
+  class="relative w-full overflow-hidden"
+  style={`min-height: ${heightStyle};`}
+  data-placeholder={!hasMedia ? "true" : undefined}
+>
+
+  <!-- ── BACKGROUND: IMAGE ─────────────────────────────────────────────────── -->
+  {isImage && (
+    <img
+      src={media!.src}
+      alt={media?.alt ?? ""}
+      class="absolute inset-0 h-full w-full object-cover"
+      aria-hidden={!media?.alt ? "true" : undefined}
+      loading="lazy"
+    />
+  )}
+
+  <!-- ── BACKGROUND: VIDEO ─────────────────────────────────────────────────── -->
+  {isVideo && (
+    <>
+      <style>
+        @media (prefers-reduced-motion: reduce) {
+          .editbanner-video  { display: none !important; }
+          .editbanner-poster { display: block !important; }
+        }
+      </style>
+      <video
+        class="editbanner-video absolute inset-0 h-full w-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={media?.poster}
+        aria-hidden="true"
+      >
+        {media?.webm && <source src={media.webm} type="video/webm" />}
+        {media?.mp4  && <source src={media.mp4}  type="video/mp4" />}
+      </video>
+      <img
+        src={media?.poster ?? ""}
+        alt=""
+        class="editbanner-poster hidden absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
+      />
+    </>
+  )}
+
+  <!-- ── PLACEHOLDER (no media provided) ──────────────────────────────────── -->
+  {!hasMedia && (
+    <div
+      class="absolute inset-0"
+      style={`
+        background-color: var(--color-ink);
+        background-image: radial-gradient(
+          ellipse 70% 60% at 50% 80%,
+          color-mix(in srgb, var(--color-ember) 12%, transparent) 0%,
+          transparent 65%
+        );
+      `}
+      aria-hidden="true"
+    ></div>
+  )}
+
+  <!-- ── SCRIM GRADIENT ────────────────────────────────────────────────────── -->
+  <!--
+    Light theme: dark scrim from bottom for text legibility over media.
+    Dark theme: lighter fade since ink text reads against lighter images.
+  -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style={theme === "dark"
+      ? "background: linear-gradient(to top, rgba(255,255,255,0.45) 0%, transparent 55%);"
+      : "background: linear-gradient(to top, rgba(10,10,10,0.70) 0%, rgba(10,10,10,0.10) 55%, transparent 100%);"}
+    aria-hidden="true"
+  ></div>
+
+  <!-- ── CONTENT ───────────────────────────────────────────────────────────── -->
+  <div
+    class:list={["relative z-10 flex h-full w-full", contentAlign]}
+    style={`min-height: ${heightStyle};`}
+  >
+    <div class={paddingClass} style="max-width: 64ch;">
+
+      <!-- Eyebrow -->
+      {eyebrow && (
+        <p
+          class="nav-label mb-4 uppercase"
+          style={`color: ${textColor}; opacity: 0.75;`}
+        >
+          {eyebrow}
+        </p>
+      )}
+
+      <!-- Title -->
+      <h2
+        class="font-display m-0 font-bold uppercase"
+        style={`
+          font-size: clamp(1.75rem, 4vw, 3.25rem);
+          letter-spacing: -0.03em;
+          line-height: 1.05;
+          color: ${textColor};
+        `}
+      >
+        {title}
+      </h2>
+
+      <!-- CTAs -->
+      {ctas.length > 0 && (
+        <div class:list={["mt-7 flex flex-wrap gap-3", align === "center" || align === "bottom-center" ? "justify-center" : ""]}>
+          {ctas.map((cta) => (
+            <a
+              href={cta.href}
+              class="button"
+              style={theme === "dark"
+                ? "background-color: var(--color-ink); color: var(--color-paper);"
+                : "background-color: var(--color-paper); color: var(--color-ink);"}
+            >
+              {cta.label}
+            </a>
+          ))}
+        </div>
+      )}
+
+    </div>
+  </div>
+
+</section>
+
+{isVideo && (
+  <script>
+    (function () {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const vids = Array.from(document.querySelectorAll(".editbanner-video"));
+      if (!vids.length) return;
+      function tryPlay(v: Element) {
+        if (reduce.matches) return;
+        const vid = v as HTMLVideoElement;
+        const p = vid.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      }
+      vids.forEach((v) => {
+        const vid = v as HTMLVideoElement;
+        if (vid.readyState >= 2) tryPlay(v);
+        else vid.addEventListener("canplay", () => tryPlay(v), { once: true });
+      });
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (reduce.matches) return;
+              if (e.isIntersecting) tryPlay(e.target);
+              else (e.target as HTMLVideoElement).pause();
+            });
+          },
+          { threshold: 0.1 }
+        );
+        vids.forEach((v) => io.observe(v));
+      }
+    })();
+  </script>
+)}

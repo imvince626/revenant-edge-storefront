@@ -1,0 +1,182 @@
+---
+/**
+ * SplitBanner.astro — two half-width editorial tiles
+ *
+ * Desktop: two equal-width columns side by side (grid-cols-2).
+ * Mobile: stacked (grid-cols-1).
+ *
+ * Each tile is a full-bleed image (or placeholder ink block) with
+ * eyebrow/title/CTA overlaid bottom-left over a scrim.
+ *
+ * If media.src is absent, renders an ink placeholder with ember radial-gradient.
+ * IMAGE SLOT: drop campaign photo via props.left.media.src or props.right.media.src
+ *
+ * Design tokens: ink, paper, ember, font-display, .nav-label,
+ *   --ease-standard, --duration-standard.
+ */
+
+export interface BannerMedia {
+  type?: "image" | "video";
+  src?: string;
+  webm?: string;
+  mp4?: string;
+  poster?: string;
+  alt?: string;
+}
+
+export interface BannerCta {
+  label: string;
+  href: string;
+}
+
+export interface SplitTile {
+  media?: BannerMedia;
+  eyebrow?: string;
+  title: string;
+  cta?: BannerCta;
+}
+
+export interface Props {
+  left: SplitTile;
+  right: SplitTile;
+}
+
+const { left, right } = Astro.props as Props;
+
+const tiles = [left, right];
+---
+
+<!-- IMAGE SLOT: drop campaign photos via props.left.media.src and props.right.media.src -->
+<div class="grid grid-cols-1 md:grid-cols-2">
+
+  {tiles.map((tile, i) => {
+    const hasMedia  = !!tile.media?.src || (tile.media?.type === "video" && (tile.media?.webm || tile.media?.mp4));
+    const isVideo   = tile.media?.type === "video";
+    const isImage   = !isVideo && !!tile.media?.src;
+    const videoClass = `splitbanner-video-${i}`;
+    const posterClass = `splitbanner-poster-${i}`;
+
+    return (
+      <div
+        class="relative overflow-hidden"
+        style="aspect-ratio: 3/4; min-height: 0;"
+        data-placeholder={!hasMedia ? "true" : undefined}
+      >
+        <!-- Portrait aspect on mobile; tall panel on desktop -->
+        <style>{`
+          @media (min-width: 768px) {
+            .split-tile-${i} { aspect-ratio: auto; min-height: 70vh; }
+          }
+        `}</style>
+        <div class={`split-tile-${i} absolute inset-0`}>
+
+          <!-- IMAGE background -->
+          {isImage && (
+            <img
+              src={tile.media!.src}
+              alt={tile.media?.alt ?? ""}
+              class="h-full w-full object-cover"
+              aria-hidden={!tile.media?.alt ? "true" : undefined}
+              loading="lazy"
+            />
+          )}
+
+          <!-- VIDEO background -->
+          {isVideo && (
+            <>
+              <style>{`
+                @media (prefers-reduced-motion: reduce) {
+                  .${videoClass}  { display: none !important; }
+                  .${posterClass} { display: block !important; }
+                }
+              `}</style>
+              <video
+                class={`${videoClass} h-full w-full object-cover`}
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                poster={tile.media?.poster}
+                aria-hidden="true"
+              >
+                {tile.media?.webm && <source src={tile.media.webm} type="video/webm" />}
+                {tile.media?.mp4  && <source src={tile.media.mp4}  type="video/mp4" />}
+              </video>
+              <img
+                src={tile.media?.poster ?? ""}
+                alt=""
+                class={`${posterClass} hidden h-full w-full object-cover`}
+                aria-hidden="true"
+              />
+            </>
+          )}
+
+          <!-- PLACEHOLDER (no media) -->
+          {!hasMedia && (
+            <div
+              class="h-full w-full"
+              style={`
+                background-color: var(--color-ink);
+                background-image: radial-gradient(
+                  ellipse 80% 60% at ${i === 0 ? "80% 90%" : "20% 90%"},
+                  color-mix(in srgb, var(--color-ember) 10%, transparent) 0%,
+                  transparent 65%
+                );
+              `}
+              aria-hidden="true"
+            ></div>
+          )}
+
+        </div>
+
+        <!-- SCRIM -->
+        <div
+          class="pointer-events-none absolute inset-0"
+          style="background: linear-gradient(to top, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.08) 45%, transparent 65%);"
+          aria-hidden="true"
+        ></div>
+
+        <!-- CONTENT (bottom-left) -->
+        <div class="absolute bottom-0 left-0 z-10 p-6 md:p-8" style="max-width: 48ch;">
+
+          {tile.eyebrow && (
+            <p class="nav-label mb-3" style="color: rgba(255,255,255,0.70);">
+              {tile.eyebrow}
+            </p>
+          )}
+
+          <h2
+            class="font-display m-0 font-bold uppercase text-paper"
+            style={`
+              font-size: clamp(1.5rem, 3vw, 2.5rem);
+              letter-spacing: -0.03em;
+              line-height: 1.05;
+            `}
+          >
+            {tile.title}
+          </h2>
+
+          {tile.cta && (
+            <a
+              href={tile.cta.href}
+              class="nav-label mt-5 inline-flex items-center gap-1 uppercase text-paper"
+              style={`
+                text-decoration-line: underline;
+                text-decoration-thickness: 1px;
+                text-underline-offset: 4px;
+                text-decoration-color: rgba(255,255,255,0.5);
+                transition: text-decoration-color var(--duration-standard) var(--ease-standard);
+              `}
+            >
+              <span aria-hidden="true">→</span>
+              {tile.cta.label}
+            </a>
+          )}
+
+        </div>
+      </div>
+    );
+  })}
+
+</div>

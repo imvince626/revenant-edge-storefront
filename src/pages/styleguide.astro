@@ -1,0 +1,180 @@
+---
+// src/pages/styleguide.astro
+// Design system proof page — review only, not linked in nav
+import Header from "../components/Header.astro";
+import CartDrawer from "../components/CartDrawer.svelte";
+const swatches = [
+  { name: "ink",       hex: "#0A0A0A", cls: "bg-ink",       text: "text-paper" },
+  { name: "paper",     hex: "#FFFFFF", cls: "bg-paper",     text: "text-ink",   border: true },
+  { name: "muted",     hex: "#6B6B6B", cls: "bg-muted",     text: "text-paper" },
+  { name: "faint",     hex: "#9A9A9A", cls: "bg-faint",     text: "text-paper" },
+  { name: "line",      hex: "#E5E5E5", cls: "bg-line",      text: "text-ink" },
+  { name: "surface",   hex: "#F5F5F4", cls: "bg-surface",   text: "text-ink",   border: true },
+  { name: "ember",     hex: "#D33A2C", cls: "bg-ember",     text: "text-paper" },
+  { name: "ember-700", hex: "#A82A20", cls: "bg-ember-700", text: "text-paper" },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Revenant Edge — Styleguide</title>
+    <style is:global>
+      @import "../styles/global.css";
+    </style>
+  </head>
+  <body>
+    <CartDrawer client:idle />
+    <Header solidFromTop={true} />
+    <div class="container pt-28 pb-16 space-y-20">
+
+      <!-- Header -->
+      <header>
+        <p class="nav-label text-muted mb-3">Revenant Edge</p>
+        <h1>Design System</h1>
+        <p class="text-muted mt-3 text-lg">Token reference + type scale proof page.</p>
+      </header>
+
+      <!-- Color Swatches -->
+      <section>
+        <h2 class="mb-8">Color Tokens</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {swatches.map(s => (
+            <div class={[s.cls, s.border ? "border border-line" : "", "rounded-lg overflow-hidden"].join(" ")}>
+              <div class="h-24" />
+              <div class={[s.text, "px-3 py-2 bg-black/5"].join(" ")}>
+                <p class="font-display font-semibold text-sm">{`--color-${s.name}`}</p>
+                <p class="text-xs font-mono opacity-70">{s.hex}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Type Scale -->
+      <section>
+        <h2 class="mb-8">Type Scale</h2>
+        <div class="space-y-6 border-t border-line pt-6">
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">Display / H1</span>
+            <h1>Revenant Edge</h1>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">H2</span>
+            <h2>Hand-Finished Apparel</h2>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">H3</span>
+            <h3>Limited Drop — Summer 2025</h3>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">H4</span>
+            <h4>Free shipping on orders over $75</h4>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">Body</span>
+            <p class="max-w-prose">
+              Every piece is cut, printed, and finished by hand in our LA studio.
+              No mass production. No shortcuts. Built for people who give a damn about what they wear.
+            </p>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">Small</span>
+            <p class="text-sm text-muted max-w-prose">
+              All sales final on limited-run pieces. Questions? Reach us at hello@revenantedge.com.
+            </p>
+          </div>
+
+          <div class="flex items-baseline gap-6 py-4 border-b border-line">
+            <span class="nav-label text-muted w-28 shrink-0">Nav Label</span>
+            <span class="nav-label">New Arrivals · Shop All · About · Contact</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Button Styles -->
+      <section>
+        <h2 class="mb-8">Button Styles</h2>
+        <div class="flex flex-wrap gap-4 items-center">
+
+          <!-- Solid ink -->
+          <button
+            style="font-family: var(--font-display); transition: opacity var(--duration-standard) var(--ease-standard);"
+            class="bg-ink text-paper px-6 py-3 font-semibold text-sm uppercase tracking-widest rounded-none hover:opacity-75 focus:outline-none focus:ring-2 focus:ring-ink focus:ring-offset-2"
+          >
+            Add to Cart
+          </button>
+
+          <!-- Outline -->
+          <button
+            style="font-family: var(--font-display); transition: background-color var(--duration-standard) var(--ease-standard), color var(--duration-standard) var(--ease-standard);"
+            class="border border-ink text-ink bg-paper px-6 py-3 font-semibold text-sm uppercase tracking-widest rounded-none hover:bg-ink hover:text-paper focus:outline-none focus:ring-2 focus:ring-ink focus:ring-offset-2"
+          >
+            View Collection
+          </button>
+
+          <!-- Ember accent -->
+          <button
+            style="font-family: var(--font-display); background-color: var(--color-ember); transition: background-color var(--duration-standard) var(--ease-standard);"
+            class="text-paper px-6 py-3 font-semibold text-sm uppercase tracking-widest rounded-none hover:bg-ember-700 focus:outline-none focus:ring-2 focus:ring-ember focus:ring-offset-2"
+            onmouseover="this.style.backgroundColor='var(--color-ember-700)'"
+            onmouseout="this.style.backgroundColor='var(--color-ember)'"
+          >
+            Shop the Drop
+          </button>
+
+        </div>
+      </section>
+
+      <!-- Dark section demo -->
+      <section>
+        <h2 class="mb-8">Dark Section</h2>
+        <div class="section-dark rounded-none px-10 py-16 space-y-6">
+          <p class="nav-label" style="color: var(--color-faint);">Limited Drop</p>
+          <h2 class="text-paper">Built Different.<br/>Worn With Intent.</h2>
+          <p style="color: var(--color-faint); max-width: 42ch;">
+            Every Revenant Edge piece is a small run. When it's gone, it's gone.
+            No restocks. No reprints.
+          </p>
+          <div class="flex gap-4 pt-2 flex-wrap">
+            <button
+              style="font-family: var(--font-display); color: var(--color-ink); background-color: var(--color-paper); transition: opacity var(--duration-standard) var(--ease-standard);"
+              class="px-6 py-3 font-semibold text-sm uppercase tracking-widest hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+            >
+              Shop Now
+            </button>
+            <button
+              style="font-family: var(--font-display); color: var(--color-paper); border: 1px solid var(--color-muted); transition: border-color var(--duration-standard) var(--ease-standard);"
+              class="px-6 py-3 font-semibold text-sm uppercase tracking-widest hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+            >
+              Our Story
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Logo preview -->
+      <section>
+        <h2 class="mb-8">Brand Assets</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="border border-line p-8 flex items-center justify-center bg-paper">
+            <img src="/logo-black.png" alt="Revenant Edge logo (black)" class="w-48 h-48 object-contain" />
+          </div>
+          <div class="bg-ink p-8 flex items-center justify-center">
+            <img src="/logo-white.png" alt="Revenant Edge logo (white)" class="w-48 h-48 object-contain" />
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </body>
+</html>

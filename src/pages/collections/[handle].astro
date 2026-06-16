@@ -1,0 +1,119 @@
+---
+import { getCollectionByHandle } from "../../utils/shopify";
+import { setCache } from "../../utils/cache";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NotFoundLayout from "../../layouts/NotFoundLayout.astro";
+import ProductCard from "../../components/ProductCard.astro";
+
+const { handle } = Astro.params;
+const headers = Astro.request.headers;
+const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
+
+const collection = await getCollectionByHandle({
+  handle: handle || "",
+  limit: 48,
+  buyerIP: ip,
+});
+
+if (!collection) {
+  Astro.response.status = 404;
+}
+
+const products = collection?.products.nodes.filter(Boolean) ?? [];
+const title = collection?.title ?? "Collection";
+const description = collection?.description ?? "";
+const heroImage = collection?.image;
+const analyticsProducts = JSON.stringify(products);
+const analyticsListName = JSON.stringify(title);
+
+setCache.short(Astro);
+---
+
+{
+  !collection ? (
+    <NotFoundLayout title="Collection not found" message="Collection not found" />
+  ) : (
+    <BaseLayout title={`${title} | Revenant Edge`} description={description || `Shop ${title} from Revenant Edge.`} solidHeader={true}>
+      <section class="border-b border-line bg-paper">
+        <div class="grid min-h-[42vh] grid-cols-1 lg:grid-cols-[minmax(0,42fr)_minmax(0,58fr)]">
+          <div class="flex flex-col justify-end px-6 py-10 md:px-10 lg:py-12">
+            <p class="nav-label mb-4 text-muted">Collection</p>
+            <h1 class="font-display max-w-[12ch] text-[clamp(2.25rem,6vw,5.5rem)] font-bold uppercase leading-none text-ink">
+              {title}
+            </h1>
+            {description && (
+              <p class="mt-5 max-w-[46ch] font-sans text-sm leading-relaxed text-muted">
+                {description}
+              </p>
+            )}
+          </div>
+
+          <div class="relative min-h-[42vh] overflow-hidden bg-surface">
+            {heroImage ? (
+              <img
+                src={`${heroImage.url}&width=1800`}
+                alt={heroImage.altText ?? title}
+                width={heroImage.width}
+                height={heroImage.height}
+                class="h-full w-full object-cover"
+                loading="eager"
+                sizes="(min-width: 1024px) 58vw, 100vw"
+              />
+            ) : (
+              <div
+                class="h-full w-full"
+                style="background-color: var(--color-ink); background-image: radial-gradient(ellipse 70% 70% at 50% 70%, color-mix(in srgb, var(--color-ember) 12%, transparent) 0%, transparent 68%);"
+                aria-hidden="true"
+              ></div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section class="sticky top-[90px] z-30 border-b border-line bg-paper">
+        <div class="flex min-h-12 items-center justify-between px-4 md:px-8">
+          <div class="flex items-center gap-1">
+            <button class="nav-label border border-line px-4 py-3 text-ink transition-colors hover:border-ink" type="button">
+              Filter
+            </button>
+            <button class="nav-label border border-line px-4 py-3 text-ink transition-colors hover:border-ink" type="button">
+              Sort
+            </button>
+          </div>
+          <p class="font-sans text-xs text-muted">{products.length} styles</p>
+        </div>
+      </section>
+
+      <section class="px-1 py-1 md:px-2">
+        {products.length > 0 ? (
+          <div class="grid grid-cols-2 gap-x-1 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => <ProductCard product={product} />)}
+          </div>
+        ) : (
+          <div class="flex min-h-[32vh] flex-col items-center justify-center px-6 text-center">
+            <p class="nav-label text-muted">No products published yet</p>
+            <a href="/" class="nav-label mt-5 text-ink underline underline-offset-4">Back to home</a>
+          </div>
+        )}
+      </section>
+
+      <script type="application/json" id="__collection_list_data__" set:html={analyticsProducts}></script>
+      <script type="application/json" id="__collection_list_name__" set:html={analyticsListName}></script>
+      <script>
+        import { trackViewItemList } from "../../utils/analytics";
+        try {
+          const dataEl = document.getElementById("__collection_list_data__");
+          const nameEl = document.getElementById("__collection_list_name__");
+          if (dataEl && nameEl) {
+            const products = JSON.parse(dataEl.textContent || "[]");
+            const name = JSON.parse(nameEl.textContent || '"Collection"');
+            trackViewItemList(name, products);
+          }
+        } catch (_) {
+          // Analytics is non-blocking.
+        }
+      </script>
+    </BaseLayout>
+  )
+}

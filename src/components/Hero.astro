@@ -1,0 +1,331 @@
+---
+/**
+ * Hero.astro — Revenant Edge split video hero
+ *
+ * Desktop (md+): two-column full-bleed.
+ *   LEFT ~55%  = bg-ink, existing headline / eyebrow / subcopy / CTAs.
+ *   RIGHT ~45% = portrait video, object-cover, fills column height.
+ *
+ * Mobile (<md): video is full-bleed behind content; bg-ink/55 scrim keeps
+ *   paper-colored headline + CTAs readable.
+ *
+ * Video: hero-loop.mp4 / hero-loop.webm = first 12s of the source clip.
+ *   In-point is 0s — change -ss in the ffmpeg recipe to shift it.
+ *
+ * Reduced-motion: autoplay suppressed; poster image shown instead.
+ *
+ * Design tokens: bg-ink, text-paper, text-ember, font-display, font-sans,
+ *   .nav-label, --ease-standard, --duration-standard, --color-ember, --color-ink,
+ *   --color-paper, --color-muted.
+ *
+ * The transparent white header renders over the dark LEFT column on desktop
+ * and over the scrim on mobile — no changes to Header.astro required.
+ */
+---
+
+<section
+  class="relative w-full overflow-hidden bg-ink text-paper"
+  style="min-height: min(90vh, 820px);"
+  aria-label="Hero"
+>
+
+  <!-- ── VIDEO (full-bleed on mobile, right column on desktop) ─────────────── -->
+  <!--
+    Mobile:  absolute, covers entire section behind the scrim.
+    Desktop: static flow, right column (55%/45% split via the flex layout below).
+    aria-hidden — decorative; poster provides the still frame.
+  -->
+
+  <!-- Mobile video / poster (hidden on md+) -->
+  <div
+    class="absolute inset-0 md:hidden"
+    aria-hidden="true"
+  >
+    <!-- Reduced-motion: hide video, show poster -->
+    <style>
+      @media (prefers-reduced-motion: reduce) {
+        .hero-video-mobile { display: none !important; }
+        .hero-poster-mobile { display: block !important; }
+      }
+    </style>
+    <video
+      class="hero-video-mobile h-full w-full object-cover"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      poster="/hero-loop-poster.jpg"
+      aria-hidden="true"
+    >
+      <!-- webm first for VP9-capable browsers; mp4 fallback -->
+      <source src="/hero-loop.webm" type="video/webm" />
+      <source src="/hero-loop.mp4" type="video/mp4" />
+    </video>
+    <!-- Poster fallback for reduced-motion (hidden by default) -->
+    <img
+      src="/hero-loop-poster.jpg"
+      alt=""
+      class="hero-poster-mobile hidden h-full w-full object-cover"
+      aria-hidden="true"
+    />
+  </div>
+
+  <!-- Dark scrim on mobile so paper text stays readable over the video -->
+  <div
+    class="pointer-events-none absolute inset-0 md:hidden"
+    style="background-color: color-mix(in srgb, var(--color-ink) 55%, transparent);"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ── DESKTOP LAYOUT: flex row, full height ────────────────────────────── -->
+  <div class="relative flex h-full w-full" style="min-height: inherit;">
+
+    <!-- LEFT column — ink bg, copy, CTAs (~55%) -->
+    <div
+      class="relative z-10 flex flex-col justify-center bg-ink"
+      style="width: 55%; padding-top: 7rem; padding-bottom: 5rem; padding-left: max(1.5rem, calc((100vw - 1280px) / 2 + 1.5rem)); padding-right: 4rem;"
+    >
+      <!-- Subtle ember radial glow — texture only -->
+      <div
+        class="pointer-events-none absolute inset-0"
+        aria-hidden="true"
+        style="
+          background: radial-gradient(
+            ellipse 80% 60% at 90% 80%,
+            color-mix(in srgb, var(--color-ember) 8%, transparent) 0%,
+            transparent 70%
+          );
+        "
+      ></div>
+
+      <!-- Eyebrow label -->
+      <p
+        class="nav-label relative mb-6"
+        style="color: var(--color-ember);"
+      >
+        Revenant Edge
+      </p>
+
+      <!-- Headline -->
+      <h1
+        class="font-display relative m-0 font-bold uppercase text-paper"
+        style="
+          font-size: clamp(2.75rem, 5.5vw, 6rem);
+          letter-spacing: -0.03em;
+          line-height: 1.0;
+          max-width: 16ch;
+        "
+      >
+        BUILT DIFFERENT.<br />
+        <span style="color: var(--color-ember);">WORN</span> WITH INTENT.
+      </h1>
+
+      <!-- Thin ember rule -->
+      <div
+        class="relative mt-8 mb-8"
+        style="width: 3rem; height: 2px; background-color: var(--color-ember);"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Sub-copy -->
+      <p
+        class="font-sans relative text-base md:text-lg"
+        style="color: rgba(255,255,255,0.70); max-width: 42ch; line-height: 1.6;"
+      >
+        Hand-finished apparel in limited runs. When it's gone, it's gone.
+      </p>
+
+      <!-- CTAs -->
+      <!-- SHOP NOW → / (homepage product grid)  |  OUR STORY → /about -->
+      <div class="relative mt-10 flex flex-wrap gap-4">
+
+        <!-- Solid paper button (dark-section variant) -->
+        <a
+          href="/"
+          style="
+            font-family: var(--font-display);
+            color: var(--color-ink);
+            background-color: var(--color-paper);
+            transition: opacity var(--duration-standard) var(--ease-standard);
+          "
+          class="inline-block px-8 py-4 font-semibold text-sm uppercase tracking-widest hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+        >
+          SHOP NOW
+        </a>
+
+        <!-- Outline paper button (dark-section variant) -->
+        <a
+          href="/about"
+          style="
+            font-family: var(--font-display);
+            color: var(--color-paper);
+            border: 1px solid var(--color-muted);
+            transition:
+              border-color var(--duration-standard) var(--ease-standard),
+              color var(--duration-standard) var(--ease-standard);
+          "
+          class="inline-block px-8 py-4 font-semibold text-sm uppercase tracking-widest hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+        >
+          OUR STORY
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT column — portrait video, object-cover (~45%), desktop only -->
+    <div
+      class="relative hidden md:block"
+      style="width: 45%;"
+      aria-hidden="true"
+    >
+      <!-- Reduced-motion: hide video, show poster on desktop too -->
+      <style>
+        @media (prefers-reduced-motion: reduce) {
+          .hero-video-desktop { display: none !important; }
+          .hero-poster-desktop { display: block !important; }
+        }
+      </style>
+      <video
+        class="hero-video-desktop absolute inset-0 h-full w-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="/hero-loop-poster.jpg"
+        aria-hidden="true"
+      >
+        <!-- webm first for VP9-capable browsers; mp4 fallback -->
+        <source src="/hero-loop.webm" type="video/webm" />
+        <source src="/hero-loop.mp4" type="video/mp4" />
+      </video>
+      <!-- Poster fallback for reduced-motion (hidden by default) -->
+      <img
+        src="/hero-loop-poster.jpg"
+        alt=""
+        class="hero-poster-desktop hidden absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
+      />
+    </div>
+
+  </div><!-- /flex row -->
+
+  <!-- Mobile content: sits over the absolute video + scrim -->
+  <!--
+    On mobile (<md) the flex-row desktop layout is invisible (hidden md:block for
+    the right column; the left column is display:block but width:55% would be wrong).
+    So we render a separate mobile content block that overlays the full-bleed video.
+  -->
+  <div
+    class="relative z-10 flex flex-col justify-center md:hidden"
+    style="min-height: inherit; padding-top: 7rem; padding-bottom: 5rem; padding-left: 1.5rem; padding-right: 1.5rem;"
+  >
+    <!-- Eyebrow label -->
+    <p
+      class="nav-label mb-6"
+      style="color: var(--color-ember);"
+    >
+      Revenant Edge
+    </p>
+
+    <!-- Headline -->
+    <h1
+      class="font-display m-0 font-bold uppercase text-paper"
+      style="
+        font-size: clamp(2.75rem, 7vw, 6rem);
+        letter-spacing: -0.03em;
+        line-height: 1.0;
+        max-width: 16ch;
+      "
+    >
+      BUILT DIFFERENT.<br />
+      <span style="color: var(--color-ember);">WORN</span> WITH INTENT.
+    </h1>
+
+    <!-- Thin ember rule -->
+    <div
+      class="mt-8 mb-8"
+      style="width: 3rem; height: 2px; background-color: var(--color-ember);"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Sub-copy -->
+    <p
+      class="font-sans text-base"
+      style="color: rgba(255,255,255,0.70); max-width: 42ch; line-height: 1.6;"
+    >
+      Hand-finished apparel in limited runs. When it's gone, it's gone.
+    </p>
+
+    <!-- CTAs -->
+    <div class="mt-10 flex flex-wrap gap-4">
+
+      <a
+        href="/"
+        style="
+          font-family: var(--font-display);
+          color: var(--color-ink);
+          background-color: var(--color-paper);
+          transition: opacity var(--duration-standard) var(--ease-standard);
+        "
+        class="inline-block px-8 py-4 font-semibold text-sm uppercase tracking-widest hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+      >
+        SHOP NOW
+      </a>
+
+      <a
+        href="/about"
+        style="
+          font-family: var(--font-display);
+          color: var(--color-paper);
+          border: 1px solid var(--color-muted);
+          transition:
+            border-color var(--duration-standard) var(--ease-standard),
+            color var(--duration-standard) var(--ease-standard);
+        "
+        class="inline-block px-8 py-4 font-semibold text-sm uppercase tracking-widest hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+      >
+        OUR STORY
+      </a>
+    </div>
+  </div><!-- /mobile content overlay -->
+
+</section>
+
+<script>
+  // Robust hero autoplay: muted autoplay is deferred by some browser/policy
+  // contexts, so explicitly start playback (respecting reduced-motion), and
+  // pause the video when the hero scrolls out of view to save CPU/battery.
+  (function () {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const vids = Array.from(
+      document.querySelectorAll(".hero-video-mobile, .hero-video-desktop")
+    );
+    if (!vids.length) return;
+
+    function tryPlay(v) {
+      if (reduce.matches) return;
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    }
+
+    vids.forEach((v) => {
+      if (v.readyState >= 2) tryPlay(v);
+      else v.addEventListener("canplay", () => tryPlay(v), { once: true });
+    });
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (reduce.matches) return;
+            if (e.isIntersecting) tryPlay(e.target);
+            else e.target.pause();
+          });
+        },
+        { threshold: 0.1 }
+      );
+      vids.forEach((v) => io.observe(v));
+    }
+  })();
+</script>

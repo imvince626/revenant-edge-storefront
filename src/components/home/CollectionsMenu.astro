@@ -1,0 +1,232 @@
+---
+/**
+ * CollectionsMenu.astro — stacked "explore collections" over media
+ *
+ * Full-bleed section with a bg image/video (or ink placeholder) and a
+ * centred column: eyebrow, large stacked collection links, then a CTA.
+ *
+ * Collection links use display-font at `clamp(1.5rem, 4vw, 3rem)` with
+ * hover opacity fade and ember color hit.
+ *
+ * Design tokens: ink, paper, ember, font-display, .nav-label,
+ *   --ease-standard, --duration-standard.
+ */
+
+export interface BannerMedia {
+  type?: "image" | "video";
+  src?: string;
+  webm?: string;
+  mp4?: string;
+  poster?: string;
+  alt?: string;
+}
+
+export interface MenuItem {
+  label: string;
+  href: string;
+}
+
+export interface BannerCta {
+  label: string;
+  href: string;
+}
+
+export interface Props {
+  media?: BannerMedia;
+  eyebrow?: string;
+  items: MenuItem[];
+  cta?: BannerCta;
+}
+
+const { media, eyebrow, items, cta } = Astro.props as Props;
+
+const hasMedia = !!media?.src || (media?.type === "video" && (media?.webm || media?.mp4));
+const isVideo  = media?.type === "video";
+const isImage  = !isVideo && !!media?.src;
+---
+
+<section
+  class="relative w-full overflow-hidden"
+  style="min-height: min(80vh, 760px);"
+>
+
+  <!-- ── BACKGROUND: IMAGE ─────────────────────────────────────────────────── -->
+  {isImage && (
+    <img
+      src={media!.src}
+      alt={media?.alt ?? ""}
+      class="absolute inset-0 h-full w-full object-cover"
+      aria-hidden={!media?.alt ? "true" : undefined}
+      loading="lazy"
+    />
+  )}
+
+  <!-- ── BACKGROUND: VIDEO ─────────────────────────────────────────────────── -->
+  {isVideo && (
+    <>
+      <style>
+        @media (prefers-reduced-motion: reduce) {
+          .collmenu-video  { display: none !important; }
+          .collmenu-poster { display: block !important; }
+        }
+      </style>
+      <video
+        class="collmenu-video absolute inset-0 h-full w-full object-cover"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={media?.poster}
+        aria-hidden="true"
+      >
+        {media?.webm && <source src={media.webm} type="video/webm" />}
+        {media?.mp4  && <source src={media.mp4}  type="video/mp4" />}
+      </video>
+      <img
+        src={media?.poster ?? ""}
+        alt=""
+        class="collmenu-poster hidden absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
+      />
+    </>
+  )}
+
+  <!-- ── PLACEHOLDER ────────────────────────────────────────────────────────── -->
+  {!hasMedia && (
+    <div
+      class="absolute inset-0"
+      style={`
+        background-color: var(--color-ink);
+        background-image: radial-gradient(
+          ellipse 90% 70% at 50% 60%,
+          color-mix(in srgb, var(--color-ember) 10%, transparent) 0%,
+          transparent 65%
+        );
+      `}
+      aria-hidden="true"
+    ></div>
+  )}
+
+  <!-- ── SCRIM ───────────────────────────────────────────────────────────────── -->
+  <div
+    class="pointer-events-none absolute inset-0"
+    style="background-color: color-mix(in srgb, var(--color-ink) 50%, transparent);"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ── CONTENT (centered column) ─────────────────────────────────────────── -->
+  <div
+    class="relative z-10 flex h-full w-full flex-col items-center justify-center px-6 py-20 text-center"
+    style="min-height: min(80vh, 760px);"
+  >
+
+    <!-- Eyebrow -->
+    {eyebrow && (
+      <p
+        class="nav-label mb-8 uppercase"
+        style="color: rgba(255,255,255,0.60);"
+      >
+        {eyebrow}
+      </p>
+    )}
+
+    <!-- Stacked collection links -->
+    <nav aria-label={eyebrow ?? "Collections"}>
+      <ul class="m-0 flex list-none flex-col items-center gap-2 p-0">
+        {items.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class="collmenu-link font-display font-bold uppercase text-paper"
+              style={`
+                display: block;
+                font-size: clamp(1.5rem, 4vw, 3rem);
+                letter-spacing: -0.02em;
+                line-height: 1.1;
+                text-decoration: none;
+                transition:
+                  opacity var(--duration-standard) var(--ease-standard),
+                  color var(--duration-standard) var(--ease-standard);
+              `}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- CTA -->
+    {cta && (
+      <a
+        href={cta.href}
+        class="nav-label mt-10 inline-flex items-center gap-1 uppercase text-paper"
+        style={`
+          text-decoration-line: underline;
+          text-decoration-thickness: 1px;
+          text-underline-offset: 4px;
+          text-decoration-color: rgba(255,255,255,0.45);
+          transition: text-decoration-color var(--duration-standard) var(--ease-standard);
+        `}
+      >
+        <span aria-hidden="true">→</span>
+        {cta.label}
+      </a>
+    )}
+
+  </div>
+
+</section>
+
+<style>
+  /* Collection link: dim on idle, full opacity on hover, ember color hit */
+  .collmenu-link {
+    opacity: 0.70;
+  }
+  .collmenu-link:hover,
+  .collmenu-link:focus-visible {
+    opacity: 1;
+    color: var(--color-ember);
+    outline: none;
+  }
+
+  /* CTA underline reveal */
+  a[href]:hover .collmenu-cta-text {
+    text-decoration-color: rgba(255,255,255,0.8);
+  }
+</style>
+
+{isVideo && (
+  <script>
+    (function () {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const vids = Array.from(document.querySelectorAll(".collmenu-video"));
+      if (!vids.length) return;
+      function tryPlay(v: Element) {
+        if (reduce.matches) return;
+        const vid = v as HTMLVideoElement;
+        const p = vid.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      }
+      vids.forEach((v) => {
+        const vid = v as HTMLVideoElement;
+        if (vid.readyState >= 2) tryPlay(v);
+        else vid.addEventListener("canplay", () => tryPlay(v), { once: true });
+      });
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (reduce.matches) return;
+              if (e.isIntersecting) tryPlay(e.target);
+              else (e.target as HTMLVideoElement).pause();
+            });
+          },
+          { threshold: 0.1 }
+        );
+        vids.forEach((v) => io.observe(v));
+      }
+    })();
+  </script>
+)}
