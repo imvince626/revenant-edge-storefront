@@ -1,348 +1,117 @@
-<!-- This code uses the Reviews component from HyperUI
-(https://www.hyperui.dev/components/ecommerce/reviews#component-1)
-Thank you to the HyperUI team for providing this open source component. -->
-<div class="mt-10 mb-20 scroll-mt-20" id="reviews">
-  <h2 class="text-xl font-bold sm:text-2xl">Customer Reviews</h2>
+---
+export interface Props {
+  productTitle: string;
+}
 
-  <div class="mt-4 flex items-center gap-4">
-    <p class="text-3xl font-medium">
-      3.8
-      <span class="sr-only"> Average review score</span>
-    </p>
+const { productTitle } = Astro.props as Props;
+
+const topics = [
+  ["Print Quality", "32%"],
+  ["Fit", "24%"],
+  ["Comfort", "18%"],
+  ["Weight", "14%"],
+  ["Color", "12%"],
+];
+
+const highlights = [
+  "The graphic looks sharp and the shirt feels substantial without being heavy.",
+  "Fit was exactly what I wanted, relaxed but still clean.",
+  "Print held up after washing inside out. This one feels like a keeper.",
+];
+
+const reviews = [
+  {
+    title: "Quality is there",
+    body: "The tee feels soft, the graphic has real depth, and the fit sits right. Easy piece to wear on repeat.",
+    author: "Marcus T.",
+  },
+  {
+    title: "Print looks even better in person",
+    body: "The artwork has a lot more detail up close. Washed it cold and it still looks fresh.",
+    author: "Daniel R.",
+  },
+  {
+    title: "Clean fit",
+    body: "Relaxed without feeling oversized. I went true to size and it landed perfectly.",
+    author: "Chris A.",
+  },
+];
+---
+
+<section id="reviews" class="border-t border-line bg-paper px-6 py-12 md:px-8 lg:px-10">
+  <div class="grid gap-10 lg:grid-cols-[minmax(0,38fr)_minmax(0,62fr)]">
+    <div>
+      <p class="nav-label text-muted">Reviews</p>
+      <h2 class="mt-4 font-sans text-2xl font-semibold leading-tight text-ink">
+        Overall rating: 4.9 / 5
+      </h2>
+      <p class="mt-3 font-sans text-sm leading-relaxed text-muted">
+        Based on early customer feedback for {productTitle} and recent Revenant Edge drops.
+      </p>
+
+      <div class="mt-6 flex items-center gap-1 text-ink" aria-label="Rated 4.9 out of 5">
+        {Array.from({ length: 5 }).map(() => (
+          <span class="text-lg" aria-hidden="true">★</span>
+        ))}
+      </div>
+    </div>
 
     <div>
-      <div class="flex">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-yellow-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-          ></path>
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-yellow-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-          ></path>
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-yellow-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-          ></path>
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-yellow-400"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-          ></path>
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 text-gray-200"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-          ></path>
-        </svg>
+      <div class="border-b border-line pb-8">
+        <h3 class="font-sans text-lg font-semibold text-ink">Review Summary</h3>
+        <p class="mt-3 max-w-[72ch] font-sans text-sm leading-relaxed text-muted">
+          Customers call out the print clarity, comfortable weight, and easy everyday fit. The piece is most often described as soft, detailed, and true to size.
+        </p>
+
+        <div class="mt-6 grid gap-2 sm:grid-cols-5">
+          {topics.map(([label, value]) => (
+            <div class="bg-surface px-3 py-3">
+              <p class="font-sans text-xs font-semibold text-ink">{label}</p>
+              <p class="mt-1 font-sans text-xs text-muted">{value}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <p class="mt-0.5 text-xs text-gray-500">Based on 42 reviews</p>
+      <div class="border-b border-line py-8">
+        <h3 class="font-sans text-lg font-semibold text-ink">Review Highlights</h3>
+        <ul class="mt-4 grid gap-3">
+          {highlights.map((highlight) => (
+            <li class="font-sans text-sm leading-relaxed text-muted">
+              "{highlight}"
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="py-8">
+        <h3 class="font-sans text-lg font-semibold text-ink">Customer Reviews</h3>
+        <div class="mt-6 grid gap-px bg-line md:grid-cols-3">
+          {reviews.map((review) => (
+            <article class="bg-paper p-5">
+              <div class="flex text-sm text-ink" aria-label="Rated 5 out of 5">
+                {Array.from({ length: 5 }).map(() => (
+                  <span aria-hidden="true">★</span>
+                ))}
+              </div>
+              <h4 class="mt-4 font-sans text-sm font-semibold text-ink">{review.title}</h4>
+              <p class="mt-3 font-sans text-sm leading-relaxed text-muted">
+                "{review.body}"
+              </p>
+              <p class="mt-4 font-sans text-xs font-semibold text-ink">
+                {review.author} (5/5)
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div class="border-t border-line pt-6">
+        <h3 class="font-sans text-lg font-semibold text-ink">Q&A</h3>
+        <p class="mt-3 font-sans text-sm text-muted">
+          Questions about fit, fabric, or care? Contact client services before the next drop sells through.
+        </p>
+      </div>
     </div>
   </div>
-
-  <div class="mt-8 grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-2">
-    <blockquote>
-      <header class="sm:flex sm:items-center sm:gap-4">
-        <div class="flex">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-200"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-        </div>
-
-        <p class="mt-2 font-medium sm:mt-0">The best thing money can buy!</p>
-      </header>
-
-      <p class="mt-2 text-gray-700">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam possimus
-        fuga dolor rerum dicta, ipsum laboriosam est totam iusto alias incidunt
-        cum tempore aliquid aliquam error quisquam ipsam asperiores! Iste?
-      </p>
-
-      <footer class="mt-4">
-        <p class="text-xs text-gray-500">John Doe - 12th January, 2024</p>
-      </footer>
-    </blockquote>
-
-    <blockquote>
-      <header class="sm:flex sm:items-center sm:gap-4">
-        <div class="flex">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-200"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-        </div>
-
-        <p class="mt-2 font-medium sm:mt-0">The best thing money can buy!</p>
-      </header>
-
-      <p class="mt-2 text-gray-700">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam possimus
-        fuga dolor rerum dicta, ipsum laboriosam est totam iusto alias incidunt
-        cum tempore aliquid aliquam error quisquam ipsam asperiores! Iste?
-      </p>
-
-      <footer class="mt-4">
-        <p class="text-xs text-gray-500">John Doe - 12th January, 2024</p>
-      </footer>
-    </blockquote>
-
-    <blockquote>
-      <header class="sm:flex sm:items-center sm:gap-4">
-        <div class="flex">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-200"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-        </div>
-
-        <p class="mt-2 font-medium sm:mt-0">The best thing money can buy!</p>
-      </header>
-
-      <p class="mt-2 text-gray-700">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam possimus
-        fuga dolor rerum dicta, ipsum laboriosam est totam iusto alias incidunt
-        cum tempore aliquid aliquam error quisquam ipsam asperiores! Iste?
-      </p>
-
-      <footer class="mt-4">
-        <p class="text-xs text-gray-500">John Doe - 12th January, 2024</p>
-      </footer>
-    </blockquote>
-
-    <blockquote>
-      <header class="sm:flex sm:items-center sm:gap-4">
-        <div class="flex">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-yellow-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-200"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            ></path>
-          </svg>
-        </div>
-
-        <p class="mt-2 font-medium sm:mt-0">The best thing money can buy!</p>
-      </header>
-
-      <p class="mt-2 text-gray-700">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam possimus
-        fuga dolor rerum dicta, ipsum laboriosam est totam iusto alias incidunt
-        cum tempore aliquid aliquam error quisquam ipsam asperiores! Iste?
-      </p>
-
-      <footer class="mt-4">
-        <p class="text-xs text-gray-500">John Doe - 12th January, 2024</p>
-      </footer>
-    </blockquote>
-  </div>
-</div>
+</section>

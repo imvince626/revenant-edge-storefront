@@ -10,15 +10,17 @@ export interface Props {
 const { price, title } = Astro.props as Props;
 ---
 
-<div class="border-b border-line pb-5">
-  <p class="nav-label mb-3 text-muted">Revenant Edge</p>
-  <h1 class="font-display text-[1.75rem] font-bold uppercase leading-[1.05] text-ink md:text-[2.15rem]">
-    {title}
-  </h1>
+<div>
+  <p class="nav-label mb-4 text-muted">App Exclusive</p>
+  <div class="flex items-start justify-between gap-6">
+    <h1 class="font-sans text-[1rem] font-semibold leading-snug text-ink">
+      {title}
+    </h1>
 
-  {price && (
-    <p class="mt-4 font-sans text-sm font-medium text-ink">
-      <Money price={price} showCurrency={false} client:load />
-    </p>
-  )}
+    {price && (
+      <p class="shrink-0 font-sans text-sm font-semibold text-ink">
+        <Money price={price} showCurrency={false} client:load />
+      </p>
+    )}
+  </div>
 </div>

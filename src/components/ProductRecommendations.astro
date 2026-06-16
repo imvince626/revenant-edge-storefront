@@ -4,9 +4,10 @@ import ProductCard from "./ProductCard.astro";
 export interface Props {
   productId: string;
   buyerIP: string;
+  heading?: string;
 }
 
-const { productId, buyerIP } = Astro.props as Props;
+const { productId, buyerIP, heading = "Style With" } = Astro.props as Props;
 
 const productRecommendations = await getProductRecommendations({
   productId,
@@ -14,21 +15,25 @@ const productRecommendations = await getProductRecommendations({
 });
 ---
 
-{
-  productRecommendations.length > 0 && (
-    <section class="border-t border-line py-12 sm:py-16">
-      <div class="mb-5 flex items-center justify-between px-6 md:px-8">
-        <p class="nav-label text-muted">You May Also Like</p>
-        <a href="/collections/shop-all" class="nav-label text-ink underline underline-offset-4">Shop All</a>
-      </div>
-      <div class="px-6 md:px-8">
-        <h2 class="sr-only">Customers also purchased</h2>
+<section class="border-t border-line py-12 sm:py-16">
+  <div class="mb-5 flex items-center justify-between px-6 md:px-8">
+    <p class="nav-label text-muted">{heading}</p>
+    <a href="/collections/shop-all" class="nav-label text-ink underline underline-offset-4">Shop All</a>
+  </div>
+  <div class="px-6 md:px-8">
+    <h2 class="sr-only">Products to style with this item</h2>
+    {
+      productRecommendations.length > 0 ? (
         <div class="grid grid-cols-2 gap-x-1 gap-y-8 md:grid-cols-3 xl:grid-cols-4">
           {productRecommendations.map((product) => (
             <ProductCard product={product} />
           ))}
         </div>
-      </div>
-    </section>
-  )
-}
+      ) : (
+        <div class="flex min-h-[180px] items-center justify-center bg-surface px-6 text-center">
+          <p class="font-sans text-sm text-muted">Styling recommendations are coming soon.</p>
+        </div>
+      )
+    }
+  </div>
+</section>

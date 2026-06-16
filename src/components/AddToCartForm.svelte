@@ -65,12 +65,12 @@
 
 <!-- Size / variant selector (only rendered when variants are provided) -->
 {#if variants.length > 1}
-  <div class="mb-6 border-b border-line pb-6">
+  <div class="mb-4">
     <div class="mb-3 flex items-center justify-between">
-      <p class="nav-label text-muted">Size</p>
-      <a href="/pages/size-guide" class="font-sans text-xs text-muted underline underline-offset-4">Size guide</a>
+      <p class="font-sans text-sm font-semibold text-ink">Select Size</p>
+      <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Guide</a>
     </div>
-    <div class="grid grid-cols-4 gap-1">
+    <div class="grid grid-cols-5 gap-1">
       {#each variants as v}
         <button
           type="button"
@@ -78,8 +78,8 @@
           disabled={!v.availableForSale}
           aria-pressed={selectedVariantId === v.id}
           class={[
-            "nav-label",
-            "flex h-11 min-w-[3rem] items-center justify-center px-3",
+            "font-sans text-xs font-semibold",
+            "flex h-12 min-w-[3rem] items-center justify-center px-3",
             "border transition-colors",
             "disabled:cursor-not-allowed disabled:opacity-35",
             selectedVariantId === v.id
@@ -101,9 +101,9 @@
   <button
     type="submit"
     class={[
-      "nav-label",
+      "font-sans text-sm font-semibold uppercase",
       "flex w-full items-center justify-center gap-3",
-      "bg-ink text-paper px-8 py-5",
+      "bg-ink text-paper px-8 py-4",
       "transition-all duration-[280ms]",
       "hover:bg-ember-700",
       "focus:ring-2 focus:ring-ink focus:ring-offset-2 focus:outline-none",
@@ -134,7 +134,7 @@
       </svg>
     {/if}
     {#if activeAvailableForSale}
-      Add to bag
+      Add to Bag
     {:else}
       Sold out
     {/if}

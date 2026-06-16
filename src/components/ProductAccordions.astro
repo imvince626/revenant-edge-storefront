@@ -1,19 +1,24 @@
 ---
 const accordions = [
   {
-    title: "Shipping",
+    title: "Product Details",
     content:
-      "Free standard shipping on orders over $75. Orders ship within 1 to 3 business days via USPS or UPS. Expedited options available at checkout.",
+      "Hand-finished graphic apparel produced in limited runs. Each piece is cut for daily wear with a soft feel and a durable print.",
   },
   {
-    title: "Care Instructions",
+    title: "Size and Fit",
     content:
-      "Machine wash cold, inside out. Tumble dry low or hang dry. Do not bleach. Iron on reverse only. These garments are hand-finished, gentle handling keeps the print sharp.",
+      "Tees fit true to size. Hoodies are relaxed with room through the body. Size down for a closer fit.",
   },
   {
-    title: "Returns",
+    title: "Composition and Care",
     content:
-      "Unworn, unwashed items may be returned within 30 days of delivery. Final sale items are not eligible for return. Start a return at revenantedge.com/returns.",
+      "Machine wash cold, inside out. Tumble dry low or hang dry. Do not bleach. Iron on reverse only.",
+  },
+  {
+    title: "Shipping and Returns",
+    content:
+      "Free standard shipping on all orders over $100. Unworn, unwashed items may be returned within 30 days of delivery.",
   },
 ];
 ---
@@ -26,8 +31,8 @@ const accordions = [
         { "border-b border-line": index === accordions.length - 1 },
       ]}
     >
-      <summary class="flex cursor-pointer items-center justify-between border-b border-line py-4 px-0 font-sans text-sm font-medium text-ink group-open:border-transparent">
-        <span class="nav-label">{accordion.title}</span>
+      <summary class="flex cursor-pointer items-center justify-between border-b border-line py-4 px-0 font-sans text-sm font-semibold text-ink group-open:border-transparent">
+        <span>{accordion.title}</span>
         <span class="transition-transform duration-[280ms] group-open:rotate-180 text-muted">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -45,7 +50,7 @@ const accordions = [
           </svg>
         </span>
       </summary>
-      <div class="pb-4 text-sm leading-relaxed text-muted font-sans border-b border-line">
+      <div class="border-b border-line pb-4 font-sans text-sm leading-relaxed text-muted">
         {accordion.content}
       </div>
     </details>

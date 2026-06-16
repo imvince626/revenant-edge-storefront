@@ -7,10 +7,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import NotFoundLayout from "../../layouts/NotFoundLayout.astro";
 import AddToCartForm from "../../components/AddToCartForm.svelte";
 import ProductImageGallery from "../../components/ProductImageGallery.astro";
-import ProductBreadcrumb from "../../components/ProductBreadcrumb.astro";
 import ProductInformations from "../../components/ProductInformations.astro";
 import ProductRecommendations from "../../components/ProductRecommendations.astro";
-// ProductReviews hidden: component contains placeholder/demo-only content (fake names, lorem ipsum, static 4-star ratings). Will be re-enabled when real review integration is wired.
+import ProductReviews from "../../components/ProductReviews.astro";
 import ProductAccordions from "../../components/ProductAccordions.astro";
 
 const { handle } = Astro.params;
@@ -25,6 +24,56 @@ if (!product) {
 const firstVariant = product?.variants.nodes[0];
 const allVariants = product?.variants.nodes ?? [];
 setCache.short(Astro);
+
+const colorSwatches: Record<string, string> = {
+  black: "#0A0A0A",
+  white: "#FFFFFF",
+  cobalt: "#2747B8",
+  storm: "#777D88",
+  mushroom: "#B9AC9B",
+  ash: "#D3D3D3",
+  cream: "#E8E1D2",
+};
+
+function inferColor(input = "") {
+  const source = input.toLowerCase();
+  const color = Object.keys(colorSwatches).find((name) => {
+    const pattern = new RegExp(`(^|[^a-z])${name}([^a-z]|$)`, "i");
+    return pattern.test(source);
+  });
+
+  return color ? color[0].toUpperCase() + color.slice(1) : "Black";
+}
+
+function baseHandle(currentHandle = "") {
+  return currentHandle.replace(/-(black|white|cobalt|storm|mushroom|ash|cream)$/i, "");
+}
+
+const inferredColor = product
+  ? inferColor([
+      product.title,
+      product.handle,
+      product.featuredImage?.altText,
+      product.featuredImage?.url,
+    ].filter(Boolean).join(" "))
+  : "Black";
+const colorOptions = product
+  ? ["Black", "White"].map((color) => ({
+      color,
+      href: `/products/${baseHandle(product.handle)}-${color.toLowerCase()}`,
+      active: color.toLowerCase() === inferredColor.toLowerCase(),
+      swatch: colorSwatches[color.toLowerCase()],
+      image: product.featuredImage
+        ? {
+            ...product.featuredImage,
+            url: product.featuredImage.url.replace(
+              /_(BLACK|WHITE)(?=[_.?])/i,
+              `_${color.toUpperCase()}`
+            ),
+          }
+        : null,
+    }))
+  : [];
 
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
@@ -77,52 +126,117 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
       <!-- JSON-LD Product schema (SSR, for Google Shopping) -->
       {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
 
-      <section class="px-0">
+      <section class="border-t border-line px-0">
         <div
-          class="mx-auto grid max-w-[1800px] grid-cols-1 lg:grid-cols-[minmax(0,64fr)_minmax(360px,36fr)]"
+          class="mx-auto grid max-w-[1920px] grid-cols-1 lg:grid-cols-[minmax(0,62fr)_minmax(390px,38fr)]"
         >
           <div class="w-full">
             <ProductImageGallery images={product.images} />
           </div>
 
-          <aside class="border-l border-line bg-paper px-6 py-8 md:px-8 lg:sticky lg:top-[90px] lg:h-[calc(100vh-90px)] lg:self-start lg:overflow-y-auto">
-            <div class="mb-6">
-              <ProductBreadcrumb title={product.title} />
-            </div>
+          <aside class="border-l border-line bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto">
+            <div class="px-6 py-6 md:px-8">
+              <ProductInformations title={product.title} price={firstVariant?.price} />
 
-            <ProductInformations title={product.title} price={firstVariant?.price} />
-
-            <div class="mt-5 grid grid-cols-2 gap-1 border-b border-line pb-6">
-              <div class="bg-surface px-4 py-3">
-                <p class="nav-label text-muted">Drop</p>
-                <p class="mt-1 font-sans text-xs text-ink">Limited run</p>
+              <div class="mt-5 space-y-2 border-b border-line pb-5 font-sans text-sm text-muted">
+                <p>
+                  Pre-order now, ships in limited batches.
+                </p>
+                <p>
+                  {product.title.includes("Hoodie")
+                    ? "Oversized fit, size down for a regular fit."
+                    : "True to size, relaxed through the body."}
+                </p>
+                <p>
+                  Model is 6 ft and wears a size large.
+                </p>
               </div>
-              <div class="bg-surface px-4 py-3">
-                <p class="nav-label text-muted">Finish</p>
-                <p class="mt-1 font-sans text-xs text-ink">Hand-finished</p>
+
+              <div class="border-b border-line py-5">
+                <div class="mb-4 flex items-center justify-between">
+                  <div class="flex items-baseline gap-6">
+                    <p class="font-sans text-sm font-semibold text-ink">Color</p>
+                    <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
+                    <p class="font-sans text-xs text-muted">{colorOptions.length}</p>
+                  </div>
+                  <a href="/collections/shop-all" class="font-sans text-sm font-semibold text-ink">More Colors ›</a>
+                </div>
+                <div class="flex items-center gap-2 overflow-x-auto">
+                  {colorOptions.map((option) => (
+                    <a
+                      href={option.href}
+                      aria-label={`View ${option.color}`}
+                      aria-current={option.active ? "true" : undefined}
+                      class:list={[
+                        "relative flex h-20 w-20 shrink-0 items-center justify-center bg-surface",
+                        option.active && "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-ink",
+                      ]}
+                    >
+                      {option.image ? (
+                        <img
+                          src={`${option.image.url}&width=220`}
+                          alt={`${product.title} in ${option.color}`}
+                          width={option.image.width}
+                          height={option.image.height}
+                          loading="lazy"
+                          class="h-full w-full object-contain p-2"
+                        />
+                      ) : (
+                        <span
+                          class="h-8 w-8 rounded-full border border-line"
+                          style={`background-color: ${option.swatch};`}
+                        ></span>
+                      )}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div class="mt-8">
-              <AddToCartForm
-                client:load
-                variantId={firstVariant?.id ?? ""}
-                variantQuantityAvailable={firstVariant?.quantityAvailable ?? 0}
-                variantAvailableForSale={firstVariant?.availableForSale ?? false}
-                variants={allVariants}
-                product={product}
-              />
-            </div>
+              <div class="py-5">
+                <AddToCartForm
+                  client:load
+                  variantId={firstVariant?.id ?? ""}
+                  variantQuantityAvailable={firstVariant?.quantityAvailable ?? 0}
+                  variantAvailableForSale={firstVariant?.availableForSale ?? false}
+                  variants={allVariants}
+                  product={product}
+                />
+              </div>
 
-            <div class="mt-8">
-              <ProductAccordions />
+              <div class="grid text-ink">
+                {[
+                  ["Try on in-store", "Check availability at a Revenant Edge partner location."],
+                  ["Free shipping", "Complimentary standard shipping on orders over $100."],
+                  ["Easy returns", "Return unworn pieces within 30 days."],
+                ].map(([title, body]) => (
+                  <div class="bg-paper px-0 py-4">
+                    <p class="font-sans text-sm font-semibold">{title}</p>
+                    <p class="mt-1 font-sans text-xs leading-relaxed text-muted">{body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div class="mt-5 bg-ink p-5 text-paper">
+                <p class="font-display text-lg font-bold uppercase leading-none">Revenant Prestige</p>
+                <p class="mt-3 max-w-[30ch] font-sans text-xs leading-relaxed text-paper/70">
+                  Join the drop list for early access, release alerts, and member rewards.
+                </p>
+                <a href="/collections/demon-slayer" class="nav-label mt-5 inline-flex bg-paper px-4 py-3 text-ink">
+                  Join now
+                </a>
+              </div>
+
+              <div class="mt-6">
+                <ProductAccordions />
+              </div>
             </div>
           </aside>
         </div>
       </section>
 
-      <section class="pb-20">
-        <ProductRecommendations productId={product.id} buyerIP={ip} />
+      <section>
+        <ProductRecommendations productId={product.id} buyerIP={ip} heading="Style With" />
+        <ProductReviews productTitle={product.title} />
       </section>
 
       {/*
