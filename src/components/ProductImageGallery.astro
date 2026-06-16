@@ -14,23 +14,28 @@ const { images } = Astro.props as Props;
 
 const allImages = images.nodes.filter(Boolean);
 const galleryImages = allImages.length > 0 ? allImages : [null];
+const heroImage = galleryImages[0];
 ---
 
-<div class="relative grid grid-cols-1 md:grid-cols-2">
-  <div class="absolute left-4 top-4 z-10 bg-paper px-3 py-2 font-sans text-xs font-semibold text-ink">
+<div class="relative h-[calc(100svh-196px)] min-h-[520px] overflow-hidden bg-surface md:min-h-[620px] lg:h-screen lg:min-h-0">
+  <div class="absolute bottom-8 left-8 z-10 bg-paper px-4 py-3 font-sans text-lg font-semibold leading-none text-muted lg:bottom-auto lg:left-4 lg:top-4 lg:px-3 lg:py-2 lg:text-xs lg:text-ink">
     1 / {galleryImages.length}
   </div>
+  <div class="absolute bottom-8 left-[8.75rem] z-10 hidden bg-paper px-4 py-3 font-sans text-lg leading-none text-muted md:block">
+    Model is 6 ft and wears a size large
+  </div>
 
-  {galleryImages.map((image, index) => (
-    <div class:list={["bg-surface aspect-[3/4] w-full overflow-hidden", index === 0 && "md:col-span-2 md:aspect-[4/5] xl:col-span-1 xl:aspect-[3/4]"]}>
-      <ShopifyImage
-        classList="h-full w-full object-contain p-2 md:p-4"
-        loading={index === 0 ? "eager" : "lazy"}
-        image={image}
-        sizes={index === 0
-          ? "(min-width: 1400px) 520px, (min-width: 1024px) 50vw, 100vw"
-          : "(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"}
-      />
-    </div>
-  ))}
+  <button class="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink md:block" type="button" aria-label="Previous product image">
+    ‹
+  </button>
+  <button class="absolute right-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink md:block" type="button" aria-label="Next product image">
+    ›
+  </button>
+
+  <ShopifyImage
+    classList="h-full w-full scale-[1.35] object-contain p-0 lg:scale-100 lg:p-10"
+    loading="eager"
+    image={heroImage}
+    sizes="(min-width: 1024px) 50vw, 100vw"
+  />
 </div>

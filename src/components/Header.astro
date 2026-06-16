@@ -26,9 +26,9 @@ const { solidFromTop = false } = Astro.props;
   style={`top: ${solidFromTop ? "auto" : "var(--announcement-bar-height, 34px)"}; transition-property: background-color, border-color, color; transition-duration: 280ms; transition-timing-function: cubic-bezier(0.4,0,0.2,1);`}
   data-solid-from-top={solidFromTop ? "true" : "false"}
 >
-  <div class="mx-auto flex h-16 max-w-none items-center px-6 md:px-10">
+  <div class="mx-auto flex h-16 max-w-none items-center px-4 md:px-6 lg:px-8">
 
-    <nav class="hidden flex-1 items-center gap-6 lg:gap-8 md:flex" aria-label="Primary navigation">
+    <nav class="hidden flex-1 items-center gap-4 lg:gap-6 md:flex" aria-label="Primary navigation">
       <a href="/collections/shop-all" class="nav-label header-nav-link">Shop</a>
       <a href="/collections/collection-1-children-of-the-sea" class="nav-label header-nav-link">Children of the Sea</a>
     </nav>
@@ -39,7 +39,7 @@ const { solidFromTop = false } = Astro.props;
 
     <a
       href="/"
-      class="absolute left-1/2 -translate-x-1/2 md:relative md:left-auto md:shrink-0 md:translate-x-0 md:px-6"
+      class="absolute left-1/2 -translate-x-1/2 md:relative md:left-auto md:shrink-0 md:translate-x-0 md:px-4 lg:px-6"
       aria-label="Revenant Edge home"
     >
       <img
@@ -62,11 +62,10 @@ const { solidFromTop = false } = Astro.props;
       />
     </a>
 
-    <div class="flex flex-1 items-center justify-end gap-6 lg:gap-8">
-      <nav class="hidden items-center gap-6 lg:gap-8 md:flex" aria-label="Secondary navigation">
+    <div class="flex flex-1 items-center justify-end gap-4 lg:gap-6">
+      <nav class="hidden items-center gap-4 lg:gap-6 md:flex" aria-label="Secondary navigation">
         <a href="/collections/tees" class="nav-label header-nav-link">Retail</a>
-        <a href="/collections/cursed-collection" class="nav-label header-nav-link">The Vault</a>
-        <a href="/collections/demon-slayer" class="nav-label header-nav-link">Prestige</a>
+        <a href="/" class="nav-label header-nav-link">About Us</a>
         <a href="/collections/shop-all" class="nav-label header-nav-link">US / USD</a>
       </nav>
 
@@ -104,7 +103,16 @@ const { solidFromTop = false } = Astro.props;
   /* Nav link hover: ember underline */
   .header-nav-link {
     position: relative;
+    font-size: 10px;
+    line-height: 1;
     transition: opacity 180ms;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 1024px) {
+    .header-nav-link {
+      font-size: 11px;
+    }
   }
   .header-nav-link::after {
     content: "";

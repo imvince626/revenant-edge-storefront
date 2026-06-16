@@ -12,6 +12,39 @@ const { product } = Astro.props as Props;
 const primaryImage = product?.featuredImage ?? product?.images?.nodes?.[0] ?? null;
 const secondaryImage = product?.images?.nodes?.[1] ?? null;
 const hasSwap = !!secondaryImage;
+const COLOR_SWATCHES: Record<string, string> = {
+  black: "#0A0A0A",
+  white: "#FFFFFF",
+  cobalt: "#2747B8",
+  storm: "#777D88",
+  mushroom: "#B9AC9B",
+  ash: "#D3D3D3",
+  cream: "#E8E1D2",
+};
+const COLOR_NAMES = Object.keys(COLOR_SWATCHES);
+
+function titleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function inferColor() {
+  const source = [
+    product?.title,
+    product?.handle,
+    primaryImage?.altText,
+    primaryImage?.url,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  const match = COLOR_NAMES.find((name) => {
+    const pattern = new RegExp(`(^|[^a-z])${name}([^a-z]|$)`, "i");
+    return pattern.test(source);
+  });
+
+  return match ? titleCase(match) : "White";
+}
+
+const currentColor = inferColor();
+const swatches = ["White", "Black"];
 
 // Build Shopify-optimised src for a given image + width
 function imgSrc(url: string, width: number) {
@@ -25,7 +58,7 @@ function imgSrc(url: string, width: number) {
   class="product-card group block"
 >
   {/* ── Image block ── */}
-  <div class="product-card__image-wrap relative aspect-[187/251] overflow-hidden bg-surface transition-all duration-[280ms] group-hover:z-10">
+  <div class="product-card__image-wrap relative aspect-[187/251] overflow-hidden bg-paper transition-all duration-[280ms] group-hover:z-10">
 
     {/* Primary image — always visible, fades out on hover when swap exists */}
     {primaryImage && (
@@ -39,7 +72,7 @@ function imgSrc(url: string, width: number) {
         srcset={[450, 600, 800, 1000].map(w => `${imgSrc(primaryImage.url, w)} ${w}w`).join(", ")}
         class:list={[
           "product-card__img product-card__img--primary",
-          "absolute inset-0 w-full h-full object-cover",
+          "absolute inset-0 w-full h-full object-contain p-[12%] md:p-[14%]",
           "transition-opacity duration-[280ms]",
           hasSwap
             ? "group-hover:opacity-0"
@@ -60,26 +93,48 @@ function imgSrc(url: string, width: number) {
         sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         srcset={[450, 600, 800, 1000].map(w => `${imgSrc(secondaryImage.url, w)} ${w}w`).join(", ")}
         class="product-card__img product-card__img--secondary
-               absolute inset-0 w-full h-full object-cover
+               absolute inset-0 w-full h-full object-contain p-[12%] md:p-[14%]
                opacity-0 group-hover:opacity-100
                transition-opacity duration-[280ms]"
         style="transition-timing-function: var(--ease-standard);"
       />
     )}
+
+    <span class="absolute bottom-4 right-4 font-sans text-2xl font-light leading-none text-ink" aria-hidden="true">
+      +
+    </span>
   </div>
 
   {/* ── Text block ── */}
-  <div class="product-card__meta flex items-start justify-between gap-3 px-0 pt-3 pb-1">
-    <h3
-      class="product-card__title
-             font-sans text-[12px] leading-snug text-ink
-             normal-case font-normal"
-    >
-      {product?.title}
-    </h3>
-    <p class="product-card__price shrink-0 font-sans text-[12px] leading-snug text-muted">
-      <Money price={product?.variants.nodes[0].price} />
+  <div class="product-card__meta px-4 pb-7 pt-5 md:px-5">
+    <div class="flex items-start justify-between gap-4">
+      <h3 class="product-card__title font-sans text-[13px] font-semibold leading-snug text-ink normal-case">
+        {product?.title}
+      </h3>
+      <p class="product-card__price shrink-0 font-sans text-[13px] font-semibold leading-snug text-ink">
+        <Money price={product?.variants.nodes[0].price} />
+      </p>
+    </div>
+
+    <p class="mt-2 font-sans text-[13px] font-semibold leading-snug text-muted">
+      {currentColor}
     </p>
+
+    <div class="mt-3 flex items-center gap-2" aria-label={`${product?.title} colors`}>
+      {swatches.map((color) => (
+        <span
+          class:list={[
+            "h-[13px] w-[13px] rounded-full border",
+            currentColor === color ? "border-ink" : "border-line",
+          ]}
+          style={`background-color: ${COLOR_SWATCHES[color.toLowerCase()]};`}
+          title={color}
+        ></span>
+      ))}
+      <span class="font-sans text-[13px] font-semibold leading-none text-muted">
+        {swatches.length} Colors
+      </span>
+    </div>
   </div>
 </a>
 

@@ -75,6 +75,32 @@ const colorOptions = product
     }))
   : [];
 
+const productImages = product?.images.nodes.filter(Boolean) ?? [];
+const storyImage = productImages[1] ?? productImages[0] ?? null;
+const mediaStripImages = [
+  productImages[2] ?? productImages[0] ?? null,
+  productImages[3] ?? productImages[1] ?? productImages[0] ?? null,
+  productImages[4] ?? productImages[0] ?? null,
+];
+const productDetails = [
+  {
+    title: "Premium Cotton Jersey",
+    body: "Soft jersey fabric with a substantial everyday hand feel.",
+  },
+  {
+    title: "Relaxed Silhouette",
+    body: "Designed to drape naturally through the body.",
+  },
+  {
+    title: "Screen Print Graphic",
+    body: "Artwork applied with a durable print finish.",
+  },
+  {
+    title: "Finished Construction",
+    body: "Clean seams and reinforced hems for daily wear.",
+  },
+];
+
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
   ? {
@@ -128,38 +154,32 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
 
       <section class="border-t border-line px-0">
         <div
-          class="mx-auto grid max-w-[1920px] grid-cols-1 lg:grid-cols-[minmax(0,62fr)_minmax(390px,38fr)]"
+          class="mx-auto grid max-w-[1920px] grid-cols-1 lg:grid-cols-2"
         >
           <div class="w-full">
             <ProductImageGallery images={product.images} />
           </div>
 
-          <aside class="border-l border-line bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto">
-            <div class="px-6 py-6 md:px-8">
+          <aside class="border-t border-line bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-l lg:border-t-0">
+            <div class="flex min-h-full flex-col px-6 py-6 md:px-8 lg:px-[7.5vw] lg:py-[16vh]">
               <ProductInformations title={product.title} price={firstVariant?.price} />
 
-              <div class="mt-5 space-y-2 border-b border-line pb-5 font-sans text-sm text-muted">
-                <p>
-                  Pre-order now, ships in limited batches.
-                </p>
-                <p>
-                  {product.title.includes("Hoodie")
-                    ? "Oversized fit, size down for a regular fit."
-                    : "True to size, relaxed through the body."}
-                </p>
-                <p>
-                  Model is 6 ft and wears a size large.
-                </p>
+              <div class="mt-5 flex gap-1 text-sm text-ink" aria-label="Product rating">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
               </div>
 
-              <div class="border-b border-line py-5">
+              <div class="py-8">
                 <div class="mb-4 flex items-center justify-between">
                   <div class="flex items-baseline gap-6">
                     <p class="font-sans text-sm font-semibold text-ink">Color</p>
-                    <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
                     <p class="font-sans text-xs text-muted">{colorOptions.length}</p>
+                    <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
                   </div>
-                  <a href="/collections/shop-all" class="font-sans text-sm font-semibold text-ink">More Colors ›</a>
+                  <a href="/account" class="font-sans text-sm font-semibold text-muted">Add to Wishlist ♡</a>
                 </div>
                 <div class="flex items-center gap-2 overflow-x-auto">
                   {colorOptions.map((option) => (
@@ -192,7 +212,7 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
                 </div>
               </div>
 
-              <div class="py-5">
+              <div class="border-t border-line py-6">
                 <AddToCartForm
                   client:load
                   variantId={firstVariant?.id ?? ""}
@@ -203,30 +223,24 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
                 />
               </div>
 
-              <div class="grid text-ink">
+              <div class="grid border-t border-line text-ink">
                 {[
-                  ["Try on in-store", "Check availability at a Revenant Edge partner location."],
-                  ["Free shipping", "Complimentary standard shipping on orders over $100."],
-                  ["Easy returns", "Return unworn pieces within 30 days."],
+                  ["Free shipping over $100", "Complimentary standard shipping on qualifying orders."],
+                  ["Ships from the USA", "Packed and fulfilled from our domestic studio."],
+                  ["Earn Revenant points", "Members earn points on every order."],
+                  ["Pay in installments", "Flexible payment options available at checkout."],
                 ].map(([title, body]) => (
-                  <div class="bg-paper px-0 py-4">
-                    <p class="font-sans text-sm font-semibold">{title}</p>
-                    <p class="mt-1 font-sans text-xs leading-relaxed text-muted">{body}</p>
+                  <div class="flex items-center justify-between gap-5 border-b border-line bg-paper px-0 py-4">
+                    <div>
+                      <p class="font-sans text-sm font-semibold">{title}</p>
+                      <p class="mt-1 font-sans text-xs leading-relaxed text-muted">{body}</p>
+                    </div>
+                    <span class="font-sans text-lg text-ink" aria-hidden="true">›</span>
                   </div>
                 ))}
               </div>
 
-              <div class="mt-5 bg-ink p-5 text-paper">
-                <p class="font-display text-lg font-bold uppercase leading-none">Revenant Prestige</p>
-                <p class="mt-3 max-w-[30ch] font-sans text-xs leading-relaxed text-paper/70">
-                  Join the drop list for early access, release alerts, and member rewards.
-                </p>
-                <a href="/collections/demon-slayer" class="nav-label mt-5 inline-flex bg-paper px-4 py-3 text-ink">
-                  Join now
-                </a>
-              </div>
-
-              <div class="mt-6">
+              <div class="mt-auto pt-12">
                 <ProductAccordions />
               </div>
             </div>
@@ -234,8 +248,60 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
         </div>
       </section>
 
+      <section class="grid grid-cols-1 border-t border-line lg:grid-cols-2">
+        <div class="flex min-h-[720px] items-center justify-center bg-paper px-8 py-20 text-center lg:px-16">
+          <div class="grid max-w-[26rem] gap-16">
+            {productDetails.map((detail) => (
+              <div>
+                <h2 class="font-sans text-base font-semibold text-ink">{detail.title}</h2>
+                <p class="mt-5 font-sans text-sm leading-relaxed text-muted">{detail.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="min-h-[720px] overflow-hidden bg-surface">
+          {storyImage ? (
+            <img
+              src={`${storyImage.url}&width=1400`}
+              alt={storyImage.altText || `${product.title} lifestyle media`}
+              width={storyImage.width}
+              height={storyImage.height}
+              loading="lazy"
+              class="h-full w-full object-cover"
+            />
+          ) : (
+            <div class="flex h-full min-h-[720px] items-center justify-center px-8 text-center">
+              <p class="font-sans text-sm text-muted">Add product video or lifestyle media here.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 border-t border-line md:grid-cols-3">
+        {mediaStripImages.map((image, index) => (
+          <div class="min-h-[520px] overflow-hidden bg-surface">
+            {image ? (
+              <img
+                src={`${image.url}&width=1100`}
+                alt={image.altText || `${product.title} detail ${index + 1}`}
+                width={image.width}
+                height={image.height}
+                loading="lazy"
+                class="h-full w-full object-cover"
+              />
+            ) : (
+              <div class="flex h-full min-h-[520px] items-center justify-center px-8 text-center">
+                <p class="font-sans text-sm text-muted">Add product detail media here.</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </section>
+
       <section>
         <ProductRecommendations productId={product.id} buyerIP={ip} heading="Style With" />
+        <ProductRecommendations productId={product.id} buyerIP={ip} heading="You May Also Like" />
         <ProductReviews productTitle={product.title} />
       </section>
 

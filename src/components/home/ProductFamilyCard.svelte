@@ -50,7 +50,7 @@
 
 {#if selected}
   <article class="group block">
-    <div class="relative aspect-[187/251] overflow-hidden bg-surface transition-all duration-[280ms] group-hover:z-10">
+    <div class="relative aspect-[187/251] overflow-hidden bg-paper transition-all duration-[280ms] group-hover:z-10">
       <a href={`/products/${selected.handle}`} aria-label={`View ${title} in ${selected.color}`} class="block h-full w-full">
         {#if selected.image}
           <img
@@ -61,7 +61,7 @@
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             class={[
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[280ms]",
+              "absolute inset-0 h-full w-full object-contain p-[12%] transition-opacity duration-[280ms] md:p-[14%]",
               hasHover ? "group-hover:opacity-0" : "group-hover:scale-[1.02]",
             ].join(" ")}
             style="transition-timing-function: var(--ease-standard);"
@@ -76,7 +76,7 @@
             height={selected.hoverImage.height}
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100"
+            class="absolute inset-0 h-full w-full object-contain p-[12%] opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100 md:p-[14%]"
             style="transition-timing-function: var(--ease-standard);"
           />
         {/if}

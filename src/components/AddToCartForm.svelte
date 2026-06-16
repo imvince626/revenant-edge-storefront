@@ -67,8 +67,11 @@
 {#if variants.length > 1}
   <div class="mb-4">
     <div class="mb-3 flex items-center justify-between">
-      <p class="font-sans text-sm font-semibold text-ink">Select Size</p>
-      <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Guide</a>
+      <div class="flex items-center gap-6">
+        <p class="font-sans text-sm font-semibold text-ink">Size</p>
+        <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Not In Stock?</a>
+      </div>
+      <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Chart</a>
     </div>
     <div class="grid grid-cols-5 gap-1">
       {#each variants as v}
@@ -134,7 +137,7 @@
       </svg>
     {/if}
     {#if activeAvailableForSale}
-      Add to Bag
+      Add to Cart
     {:else}
       Sold out
     {/if}
