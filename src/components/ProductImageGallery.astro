@@ -1,11 +1,18 @@
 ---
 import { z } from "zod";
 import { ImageResult } from "../utils/schemas";
-import ShopifyImage from "./ShopifyImage.svelte";
+import {
+  isLifestyleImage,
+  productLifestyleImages,
+} from "../utils/product-media";
 
 const ImagesResult = z.object({
   nodes: z.array(ImageResult),
 });
+
+type GalleryImage = NonNullable<z.infer<typeof ImageResult>> & {
+  display?: "contain" | "cover";
+};
 
 export interface Props {
   images: z.infer<typeof ImagesResult>;
@@ -35,18 +42,64 @@ function imageUrlWithWidth(url: string, width: number) {
   return `${url}${url.includes("?") ? "&" : "?"}width=${width}`;
 }
 
+function imageSourceKey(url: string) {
+  const match = decodeURIComponent(url)
+    .toLowerCase()
+    .match(/(?:tre\d+|img[_-]?\d+)/);
+  return match ? match[0].replace("_", "-") : null;
+}
+
+function mergeImages(shopifyImages: GalleryImage[], localImages: GalleryImage[]) {
+  const localKeys = new Set(localImages.map((image) => imageSourceKey(image.url)).filter(Boolean));
+  const seen = new Set<string>();
+
+  const productImages = shopifyImages
+    .filter((image) => {
+      const key = imageSourceKey(image.url);
+      return !key || !localKeys.has(key);
+    })
+    .filter((image) => {
+      const key = image.url;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+  return [
+    ...productImages.slice(0, 2),
+    ...localImages,
+    ...productImages.slice(2),
+  ];
+}
+
+const shopifyImages = images.nodes.filter(Boolean) as GalleryImage[];
+const lifestyleImages = productLifestyleImages(productHandle);
 const allImages = productHandle && PRODUCT_GALLERY_IMAGE_OVERRIDES[productHandle]
   ? PRODUCT_GALLERY_IMAGE_OVERRIDES[productHandle]
-  : images.nodes.filter(Boolean);
+  : mergeImages(shopifyImages, lifestyleImages);
 const galleryImages = allImages.length > 0 ? allImages : [null];
 const heroImage = galleryImages[0];
 const fullscreenImageUrl = heroImage?.url
   ? imageUrlWithWidth(heroImage.url, 1800)
   : "";
+const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
+  src: imageUrlWithWidth(image.url, 1800),
+  alt: image.altText ?? "Revenant Edge product image",
+  width: image.width,
+  height: image.height,
+  display: isLifestyleImage(image) ? "cover" : "contain",
+}));
 ---
 
-<div class="relative h-[calc(100svh-178px)] min-h-[520px] overflow-hidden bg-paper md:min-h-[620px] lg:h-screen lg:min-h-0">
-  <div class="absolute bottom-5 left-4 z-10 bg-paper px-3 py-2 font-sans text-sm font-semibold leading-none text-muted md:bottom-8 md:left-8 md:px-4 md:py-3 md:text-lg lg:bottom-auto lg:left-4 lg:top-4 lg:px-3 lg:py-2 lg:text-xs lg:text-ink">
+<div
+  class="relative h-[calc(100svh-178px)] min-h-[520px] overflow-hidden bg-paper md:min-h-[620px] lg:h-screen lg:min-h-0"
+  data-product-gallery
+  data-product-gallery-images={JSON.stringify(galleryPayload)}
+>
+  <div
+    class="absolute bottom-5 left-4 z-10 bg-paper px-3 py-2 font-sans text-sm font-semibold leading-none text-muted md:bottom-8 md:left-8 md:px-4 md:py-3 md:text-lg lg:bottom-auto lg:left-4 lg:top-4 lg:px-3 lg:py-2 lg:text-xs lg:text-ink"
+    data-product-gallery-count
+  >
     1 / {galleryImages.length}
   </div>
   <button
@@ -59,19 +112,42 @@ const fullscreenImageUrl = heroImage?.url
     <span class="absolute bottom-1 left-1 h-2 w-2 border-b border-l border-ink"></span>
   </button>
 
-  <button class="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink md:block" type="button" aria-label="Previous product image">
+  <button
+    class="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink transition-opacity hover:opacity-60 disabled:opacity-20 md:block"
+    type="button"
+    aria-label="Previous product image"
+    data-product-gallery-prev
+    disabled={galleryPayload.length <= 1}
+  >
     ‹
   </button>
-  <button class="absolute right-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink md:block" type="button" aria-label="Next product image">
+  <button
+    class="absolute right-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink transition-opacity hover:opacity-60 disabled:opacity-20 md:block"
+    type="button"
+    aria-label="Next product image"
+    data-product-gallery-next
+    disabled={galleryPayload.length <= 1}
+  >
     ›
   </button>
 
-  <ShopifyImage
-    classList="h-full w-full scale-100 object-contain object-center p-0 md:scale-[1.18] lg:scale-[1.08]"
-    loading="eager"
-    image={heroImage}
-    sizes="(min-width: 1024px) 50vw, 100vw"
-  />
+  {heroImage && (
+    <img
+      src={imageUrlWithWidth(heroImage.url, 1800)}
+      alt={heroImage.altText ?? "Revenant Edge product image"}
+      width={heroImage.width}
+      height={heroImage.height}
+      class:list={[
+        "h-full w-full object-center p-0 transition-opacity duration-[180ms]",
+        isLifestyleImage(heroImage)
+          ? "object-cover"
+          : "scale-100 object-contain md:scale-[1.18] lg:scale-[1.08]",
+      ]}
+      sizes="(min-width: 1024px) 50vw, 100vw"
+      loading="eager"
+      data-product-gallery-image
+    />
+  )}
 </div>
 
 {fullscreenImageUrl && (
@@ -97,15 +173,57 @@ const fullscreenImageUrl = heroImage?.url
         height={heroImage?.height}
         class="max-h-full max-w-full object-contain"
         loading="eager"
+        data-product-fullscreen-image
       />
     </div>
   </div>
 )}
 
 <script>
+  const gallery = document.querySelector("[data-product-gallery]");
+  const galleryImage = document.querySelector("[data-product-gallery-image]");
+  const galleryCount = document.querySelector("[data-product-gallery-count]");
+  const previousButton = document.querySelector("[data-product-gallery-prev]");
+  const nextButton = document.querySelector("[data-product-gallery-next]");
   const fullscreen = document.querySelector("[data-product-fullscreen]");
+  const fullscreenImage = document.querySelector("[data-product-fullscreen-image]");
   const openButton = document.querySelector("[data-product-fullscreen-open]");
   const closeButton = document.querySelector("[data-product-fullscreen-close]");
+  const galleryImages = JSON.parse(gallery?.getAttribute("data-product-gallery-images") ?? "[]");
+  let galleryIndex = 0;
+
+  function setImageDisplay(image, display) {
+    image.classList.toggle("object-cover", display === "cover");
+    image.classList.toggle("object-contain", display !== "cover");
+    image.classList.toggle("md:scale-[1.18]", display !== "cover");
+    image.classList.toggle("lg:scale-[1.08]", display !== "cover");
+  }
+
+  function renderGalleryImage(index) {
+    if (!galleryImage || galleryImages.length === 0) return;
+    galleryIndex = (index + galleryImages.length) % galleryImages.length;
+    const current = galleryImages[galleryIndex];
+
+    galleryImage.setAttribute("src", current.src);
+    galleryImage.setAttribute("alt", current.alt);
+    galleryImage.setAttribute("width", current.width);
+    galleryImage.setAttribute("height", current.height);
+    setImageDisplay(galleryImage, current.display);
+
+    if (fullscreenImage) {
+      fullscreenImage.setAttribute("src", current.src);
+      fullscreenImage.setAttribute("alt", current.alt);
+      fullscreenImage.setAttribute("width", current.width);
+      fullscreenImage.setAttribute("height", current.height);
+    }
+
+    if (galleryCount) {
+      galleryCount.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
+    }
+  }
+
+  previousButton?.addEventListener("click", () => renderGalleryImage(galleryIndex - 1));
+  nextButton?.addEventListener("click", () => renderGalleryImage(galleryIndex + 1));
 
   function openFullscreen() {
     if (!fullscreen) return;
@@ -129,6 +247,8 @@ const fullscreenImageUrl = heroImage?.url
     if (event.target === fullscreen) closeFullscreen();
   });
   document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") renderGalleryImage(galleryIndex - 1);
+    if (event.key === "ArrowRight") renderGalleryImage(galleryIndex + 1);
     if (event.key === "Escape" && fullscreen && !fullscreen.classList.contains("hidden")) {
       closeFullscreen();
     }

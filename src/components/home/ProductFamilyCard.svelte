@@ -1,4 +1,9 @@
 <script lang="ts">
+  import {
+    getProductCardHoverImage,
+    isLifestyleImage,
+  } from "../../utils/product-media";
+
   interface Money {
     amount: string;
     currencyCode: string;
@@ -55,7 +60,11 @@
 
   let selected = $derived(colorways[selectedIndex] ?? colorways[0]);
   let selectedImage = $derived(PRODUCT_CARD_IMAGE_OVERRIDES[selected?.handle]?.image ?? selected?.image);
-  let selectedHoverImage = $derived(PRODUCT_CARD_IMAGE_OVERRIDES[selected?.handle]?.hoverImage ?? selected?.hoverImage);
+  let selectedHoverImage = $derived(
+    PRODUCT_CARD_IMAGE_OVERRIDES[selected?.handle]?.hoverImage ??
+      getProductCardHoverImage(selected?.handle) ??
+      selected?.hoverImage
+  );
   let hasHover = $derived(!!selectedHoverImage);
 
   function formatPrice(price: Money | undefined) {
@@ -102,7 +111,12 @@
             height={selectedHoverImage.height}
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            class="absolute inset-0 h-full w-full object-contain p-[12%] opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100 md:p-[14%]"
+            class={[
+              "absolute inset-0 h-full w-full opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100",
+              isLifestyleImage(selectedHoverImage)
+                ? "object-cover p-0"
+                : "object-contain p-[12%] md:p-[14%]",
+            ].join(" ")}
             style="transition-timing-function: var(--ease-standard);"
           />
         {/if}

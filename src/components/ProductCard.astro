@@ -1,6 +1,10 @@
 ---
 import type { z } from "zod";
 import type { ProductResult } from "../utils/schemas";
+import {
+  getProductCardHoverImage,
+  isLifestyleImage,
+} from "../utils/product-media";
 
 import Money from "./Money.svelte";
 
@@ -34,7 +38,7 @@ const PRODUCT_CARD_IMAGE_OVERRIDES: Record<
 };
 const imageOverride = product ? PRODUCT_CARD_IMAGE_OVERRIDES[product.handle] : null;
 const primaryImage = imageOverride?.primary ?? product?.featuredImage ?? product?.images?.nodes?.[0] ?? null;
-const secondaryImage = imageOverride?.secondary ?? product?.images?.nodes?.[1] ?? null;
+const secondaryImage = imageOverride?.secondary ?? getProductCardHoverImage(product?.handle) ?? product?.images?.nodes?.[1] ?? null;
 const hasSwap = !!secondaryImage;
 const COLOR_SWATCHES: Record<string, string> = {
   black: "#0A0A0A",
@@ -123,10 +127,12 @@ function imgSrc(url: string, width: number) {
         loading="lazy"
         sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         srcset={[450, 600, 800, 1000].map(w => `${imgSrc(secondaryImage.url, w)} ${w}w`).join(", ")}
-        class="product-card__img product-card__img--secondary
-               absolute inset-0 w-full h-full object-contain p-[12%] md:p-[14%]
-               opacity-0 group-hover:opacity-100
-               transition-opacity duration-[280ms]"
+        class:list={[
+          "product-card__img product-card__img--secondary absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-[280ms]",
+          isLifestyleImage(secondaryImage)
+            ? "object-cover p-0"
+            : "object-contain p-[12%] md:p-[14%]",
+        ]}
         style="transition-timing-function: var(--ease-standard);"
       />
     )}
