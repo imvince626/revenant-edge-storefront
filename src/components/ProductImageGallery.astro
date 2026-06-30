@@ -92,7 +92,7 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
 ---
 
 <div
-  class="relative h-[calc(100svh-178px)] min-h-[520px] overflow-hidden bg-paper md:min-h-[620px] lg:h-screen lg:min-h-0"
+  class="relative h-[clamp(500px,135vw,620px)] overflow-hidden bg-paper md:h-[clamp(620px,82vw,820px)] lg:h-screen"
   data-product-gallery
   data-product-gallery-images={JSON.stringify(galleryPayload)}
 >

@@ -35,20 +35,20 @@ const trustpilotReviews = [
 ];
 ---
 
-<footer class="bg-ink text-paper">
+<footer class="bg-ink text-paper" data-site-footer>
   <!-- ── Main grid ── -->
-  <div class="container py-16">
+  <div class="container py-10 md:py-16">
     <section
       id="trustpilot-reviews"
-      class="mb-16 border-b border-paper/10 pb-12"
+      class="mb-10 border-b border-paper/10 pb-8 md:mb-16 md:pb-12"
       aria-labelledby="trustpilot-reviews-heading"
     >
-      <div class="grid gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
         <div>
-          <p class="nav-label text-paper/70 mb-4">Trustpilot</p>
+          <p class="nav-label mb-3 text-paper/70 md:mb-4">Trustpilot</p>
           <h2
             id="trustpilot-reviews-heading"
-            class="font-sans text-3xl font-semibold leading-tight text-paper md:text-4xl"
+            class="font-sans text-2xl font-semibold leading-tight text-paper md:text-4xl"
           >
             Reviewed by Revenant Edge customers.
           </h2>
@@ -56,7 +56,7 @@ const trustpilotReviews = [
             href={trustpilotUrl}
             target="_blank"
             rel="noreferrer"
-            class="mt-6 inline-flex items-center gap-3 font-sans text-sm font-semibold text-paper/70 transition-colors hover:text-paper"
+            class="mt-4 inline-flex items-center gap-3 font-sans text-sm font-semibold text-paper/70 transition-colors hover:text-paper md:mt-6"
           >
             <span class="text-[#00b67a]" aria-hidden="true">★★★★★</span>
             <span>3.8 TrustScore from 2 reviews</span>
@@ -64,7 +64,7 @@ const trustpilotReviews = [
           </a>
         </div>
 
-        <div class="grid gap-px bg-paper/10 md:grid-cols-2">
+        <div class="hidden gap-px bg-paper/10 md:grid md:grid-cols-2">
           {trustpilotReviews.map((review) => (
             <article class="bg-ink p-5">
               <div class="flex items-center justify-between gap-4">
@@ -83,10 +83,10 @@ const trustpilotReviews = [
       </div>
     </section>
 
-    <div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-2 gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
 
       <!-- Brand / wordmark column -->
-      <div>
+      <div class="col-span-2 lg:col-span-1">
         <a href="/" class="inline-flex transition-opacity hover:opacity-70" aria-label="Revenant Edge home">
           <img
             src="/logo-mark-white.png"
@@ -100,8 +100,8 @@ const trustpilotReviews = [
       </div>
 
       <div>
-        <p class="nav-label text-paper mb-5">Shop</p>
-        <ul class="space-y-3">
+        <p class="nav-label mb-3 text-paper">Shop</p>
+        <ul class="space-y-2">
           {shopLinks.map(([label, href]) => (
             <li><a href={href} class="font-sans text-sm text-paper/70 hover:text-paper transition-colors">{label}</a></li>
           ))}
@@ -109,8 +109,8 @@ const trustpilotReviews = [
       </div>
 
       <div>
-        <p class="nav-label text-paper mb-5">Help</p>
-        <ul class="space-y-3">
+        <p class="nav-label mb-3 text-paper">Help</p>
+        <ul class="space-y-2">
           {helpLinks.map(([label, href]) => (
             <li><a href={href} class="font-sans text-sm text-paper/70 hover:text-paper transition-colors">{label}</a></li>
           ))}
@@ -118,8 +118,8 @@ const trustpilotReviews = [
       </div>
 
       <div>
-        <p class="nav-label text-paper mb-5">Brand</p>
-        <ul class="space-y-3">
+        <p class="nav-label mb-3 text-paper">Brand</p>
+        <ul class="space-y-2">
           {brandLinks.map(([label, href]) => (
             <li><a href={href} class="font-sans text-sm text-paper/70 hover:text-paper transition-colors">{label}</a></li>
           ))}
@@ -128,10 +128,10 @@ const trustpilotReviews = [
     </div>
 
     <!-- ── Newsletter block ── -->
-    <div class="mt-16 border-t border-paper/10 pt-12">
+    <div class="mt-10 border-t border-paper/10 pt-8 md:mt-16 md:pt-12">
       <div class="max-w-md">
-        <p class="nav-label text-paper mb-3">Join the List</p>
-        <p class="font-sans text-sm text-paper/60 mb-6">
+        <p class="nav-label mb-3 text-paper">Join the List</p>
+        <p class="mb-4 font-sans text-sm text-paper/60 md:mb-6">
           Drop alerts, early access, and nothing else.
         </p>
         <form class="flex gap-0" data-newsletter-form>
@@ -157,7 +157,7 @@ const trustpilotReviews = [
 
   <!-- ── Bottom bar ── -->
   <div class="border-t border-paper/10">
-    <div class="container py-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="container flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between md:py-6">
       <p class="font-sans text-xs text-paper/40">
         &copy; {year} Revenant Edge. All rights reserved.
       </p>

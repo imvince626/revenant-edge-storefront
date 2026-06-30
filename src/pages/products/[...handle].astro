@@ -39,18 +39,6 @@ const colorSwatches: Record<string, string> = {
   ash: "#D3D3D3",
   cream: "#E8E1D2",
 };
-const PRODUCT_SWATCH_IMAGE_OVERRIDES: Record<
-  string,
-  { url: string; width: number; height: number; altText: string }
-> = {
-  "light-within-the-dark-hoodie-black": {
-    url: "/images/product-overrides/light-within-the-dark-hoodie-back-white.png",
-    width: 1080,
-    height: 1080,
-    altText: "Light Within The Dark Hoodie Black Back",
-  },
-};
-
 function inferColor(input = "") {
   const source = input.toLowerCase();
   const color = Object.keys(colorSwatches).find((name) => {
@@ -61,15 +49,6 @@ function inferColor(input = "") {
   return color ? color[0].toUpperCase() + color.slice(1) : "Black";
 }
 
-function baseHandle(currentHandle = "") {
-  return currentHandle.replace(/-(black|white|cobalt|storm|mushroom|ash|cream)$/i, "");
-}
-
-function productImageUrl(url: string, width: number) {
-  if (url.startsWith("/")) return url;
-  return `${url}${url.includes("?") ? "&" : "?"}width=${width}`;
-}
-
 const inferredColor = product
   ? inferColor([
       product.title,
@@ -78,26 +57,6 @@ const inferredColor = product
       product.featuredImage?.url,
     ].filter(Boolean).join(" "))
   : "Black";
-const colorOptions = product
-  ? ["Black"].map((color) => ({
-      color,
-      href: `/products/${baseHandle(product.handle)}-${color.toLowerCase()}`,
-      active: color.toLowerCase() === inferredColor.toLowerCase(),
-      swatch: colorSwatches[color.toLowerCase()],
-      image: PRODUCT_SWATCH_IMAGE_OVERRIDES[product.handle]
-        ? PRODUCT_SWATCH_IMAGE_OVERRIDES[product.handle]
-        : product.featuredImage
-        ? {
-            ...product.featuredImage,
-            url: product.featuredImage.url.replace(
-              /_(BLACK|WHITE)(?=[_.?])/i,
-              `_${color.toUpperCase()}`
-            ),
-          }
-        : null,
-    }))
-  : [];
-const showColorSelector = colorOptions.length > 1;
 
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
@@ -228,7 +187,19 @@ const recommendationCollection = isCollection2Product
             <div class="flex min-h-full min-w-0 flex-col px-4 pb-8 pt-5 md:px-8 lg:px-[7.5vw] lg:py-[14vh]">
               <ProductInformations title={product.title} price={firstVariant?.price} />
 
-              <div class="mt-7 flex items-center justify-between gap-4">
+              <div class="pt-6">
+                <AddToCartForm
+                  client:load
+                  variantId={firstVariant?.id ?? ""}
+                  variantQuantityAvailable={firstVariant?.quantityAvailable ?? 0}
+                  variantAvailableForSale={firstVariant?.availableForSale ?? false}
+                  variants={allVariants}
+                  product={product}
+                  colorLabel={inferredColor}
+                />
+              </div>
+
+              <div class="mt-5 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2 text-sm text-ink" aria-label="Product rating">
                   <span class="tracking-[0.08em]">★★★★★</span>
                   <a href="#trustpilot-reviews" class="font-sans text-xs text-muted underline underline-offset-2">
@@ -238,70 +209,12 @@ const recommendationCollection = isCollection2Product
               </div>
 
               {productQuote && (
-                <div class="mt-7 font-sans text-[13px] leading-snug text-muted">
+                <div class="mt-4 font-sans text-[13px] leading-snug text-muted">
                   <p>
                     {productQuote.quote}
                   </p>
                 </div>
               )}
-
-              {showColorSelector && (
-                <div class="py-7">
-                  <div class="mb-5 flex items-center justify-between">
-                    <div class="flex items-baseline gap-6">
-                      <p class="font-sans text-sm font-semibold text-ink">Color</p>
-                      <sup class="font-sans text-[10px] text-muted">{colorOptions.length}</sup>
-                      <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1 overflow-x-auto">
-                    {colorOptions.map((option) => (
-                      <a
-                        href={option.href}
-                        aria-label={`View ${option.color}`}
-                        aria-current={option.active ? "true" : undefined}
-                        class:list={[
-                          "relative flex h-[5.2rem] w-[5.2rem] shrink-0 items-center justify-center bg-paper",
-                        ]}
-                      >
-                        {option.image ? (
-                          <img
-                            src={productImageUrl(option.image.url, 220)}
-                            alt={`${product.title} in ${option.color}`}
-                            width={option.image.width}
-                            height={option.image.height}
-                            loading="lazy"
-                            class="h-full w-full object-contain p-2"
-                          />
-                        ) : (
-                          <span
-                            class="h-8 w-8 rounded-full border border-line"
-                            style={`background-color: ${option.swatch};`}
-                          ></span>
-                        )}
-                      </a>
-                    ))}
-                    <a
-                      href="/collections/shop-all"
-                      class="ml-auto hidden shrink-0 items-center gap-4 px-4 font-sans text-sm font-semibold text-ink md:flex"
-                    >
-                      <span>More Colors</span>
-                      <span class="text-xl leading-none" aria-hidden="true">›</span>
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              <div class="py-2">
-                <AddToCartForm
-                  client:load
-                  variantId={firstVariant?.id ?? ""}
-                  variantQuantityAvailable={firstVariant?.quantityAvailable ?? 0}
-                  variantAvailableForSale={firstVariant?.availableForSale ?? false}
-                  variants={allVariants}
-                  product={product}
-                />
-              </div>
 
               <div class="grid text-ink">
                 {[

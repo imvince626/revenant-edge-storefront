@@ -22,39 +22,7 @@
   // Total item count for bag label
   let itemCount = $derived($cart?.totalQuantity ?? 0);
 
-  let checkoutHref = $derived(buildCheckoutHref());
-
-  function numericShopifyId(id: string) {
-    return id.split("/").pop() ?? "";
-  }
-
-  function checkoutOrigin() {
-    try {
-      if ($cart?.checkoutUrl) {
-        return new URL($cart.checkoutUrl).origin;
-      }
-    } catch {
-      // Fall back to the public Shopify cart host if Shopify returns a malformed URL.
-    }
-
-    return "https://www.revenantedge.com";
-  }
-
-  function buildCheckoutHref() {
-    const cartLines = $cart?.lines?.nodes
-      .map((line) => {
-        const variantId = numericShopifyId(line.merchandise.id);
-        return variantId ? `${variantId}:${line.quantity}` : "";
-      })
-      .filter(Boolean)
-      .join(",");
-
-    if (!cartLines) {
-      return $cart?.checkoutUrl || "#";
-    }
-
-    return `${checkoutOrigin()}/cart/${cartLines}?storefront=true`;
-  }
+  let checkoutHref = $derived($cart?.checkoutUrl || "#");
 
   // Add focus to cart drawer when it opens
   run(() => {

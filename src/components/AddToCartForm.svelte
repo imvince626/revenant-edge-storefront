@@ -13,13 +13,22 @@
     variantAvailableForSale: boolean;
     variants?: z.infer<typeof VariantResult>[];
     product?: z.infer<typeof ProductResult>;
+    colorLabel?: string;
   }
 
-  let { variantId: initialVariantId, variantQuantityAvailable: initialQty, variantAvailableForSale: initialAvailable, variants = [], product = null }: Props = $props();
+  let {
+    variantId: initialVariantId,
+    variantQuantityAvailable: initialQty,
+    variantAvailableForSale: initialAvailable,
+    variants = [],
+    product = null,
+    colorLabel = "",
+  }: Props = $props();
   let formEl: HTMLFormElement;
   let inlineSubmitEl: HTMLButtonElement;
   let stickyVisible = $state(false);
-  let showStickyCta = $derived(stickyVisible && !$isCartDrawerOpen);
+  let footerVisible = $state(false);
+  let showStickyCta = $derived(stickyVisible && !footerVisible && !$isCartDrawerOpen);
 
   function getInitialVariantId() {
     return initialVariantId;
@@ -78,35 +87,74 @@
 
   onMount(() => {
     const media = window.matchMedia("(max-width: 767px)");
-    let observer: IntersectionObserver | null = null;
+    let inlineObserver: IntersectionObserver | null = null;
+    let footerObserver: IntersectionObserver | null = null;
+    const stickyHeight = 56;
+
+    function updateFooterState() {
+      const footer = document.querySelector("[data-site-footer]");
+      const rect = footer?.getBoundingClientRect();
+      footerVisible = Boolean(
+        media.matches &&
+          rect &&
+          rect.top < window.innerHeight - stickyHeight &&
+          rect.bottom > 0
+      );
+    }
 
     function updateStickyState() {
       stickyVisible = media.matches;
+      if (media.matches) {
+        updateFooterState();
+      } else {
+        footerVisible = false;
+      }
     }
 
     function observeInlineButton() {
-      observer?.disconnect();
-      observer = null;
+      inlineObserver?.disconnect();
+      footerObserver?.disconnect();
+      inlineObserver = null;
+      footerObserver = null;
 
       if (!inlineSubmitEl) {
         updateStickyState();
         return;
       }
 
-      observer = new IntersectionObserver(
+      inlineObserver = new IntersectionObserver(
         ([entry]) => {
           stickyVisible = media.matches && !entry.isIntersecting;
+          updateFooterState();
         },
         { threshold: 0.35 }
       );
-      observer.observe(inlineSubmitEl);
+      inlineObserver.observe(inlineSubmitEl);
+
+      const footer = document.querySelector("[data-site-footer]");
+      if (footer) {
+        footerObserver = new IntersectionObserver(
+          ([entry]) => {
+            footerVisible = media.matches && entry.isIntersecting;
+            updateFooterState();
+          },
+          { threshold: 0, rootMargin: "0px 0px -56px 0px" }
+        );
+        footerObserver.observe(footer);
+      }
     }
 
     observeInlineButton();
+    updateFooterState();
+    window.addEventListener("scroll", updateFooterState, { passive: true });
+    window.addEventListener("resize", updateFooterState);
     media.addEventListener("change", observeInlineButton);
 
     return () => {
-      observer?.disconnect();
+      inlineObserver?.disconnect();
+      footerObserver?.disconnect();
+      window.removeEventListener("scroll", updateFooterState);
+      window.removeEventListener("resize", updateFooterState);
       media.removeEventListener("change", observeInlineButton);
     };
   });
@@ -114,10 +162,10 @@
 
 <!-- Size / variant selector (only rendered when variants are provided) -->
 {#if variants.length > 1}
-  <div class="mb-4">
-    <div class="mb-5">
+  <div class="mb-5">
+    <div class="mb-3">
       <div class="flex items-center gap-6">
-        <p class="font-sans text-sm font-semibold text-ink">Size</p>
+        <p class="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-ink">Size</p>
       </div>
     </div>
     <div
@@ -144,6 +192,18 @@
           {v.title}
         </button>
       {/each}
+    </div>
+  </div>
+{/if}
+
+{#if colorLabel}
+  <div class="mb-5">
+    <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-ink">Color</p>
+    <div
+      class="inline-flex h-11 min-w-32 items-center justify-center bg-ink px-5 font-sans text-xs font-semibold uppercase tracking-normal text-paper"
+      aria-label={`Color: ${colorLabel}`}
+    >
+      {colorLabel}
     </div>
   </div>
 {/if}
