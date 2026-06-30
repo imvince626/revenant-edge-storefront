@@ -1,18 +1,17 @@
 <script lang="ts">
   const primaryLinks = [
-    { label: "About Us", href: "/" },
-    { label: "Shop Revenant Edge", href: "/collections/shop-all" },
     { label: "Shop Children of the Sea", href: "/collections/collection-1-children-of-the-sea" },
-    { label: "Retail", href: "/collections/tees", badge: "NEW" },
-    { label: "Explore", href: "/collections/collection-2-children-of-the-sea-all" },
+    { label: "Shop Demon Slayer", href: "/collections/demon-slayer" },
+    { label: "Lookbook", href: "/blogs/lookbook" },
+    { label: "Behind the Brand", href: "/about" },
   ];
 
   const secondaryLinks = [
-    { label: "Revenant App", href: "/" },
-    { label: "Outfits", href: "/collections/hoodies" },
-    { label: "Behind the Brand", href: "/" },
-    { label: "Lookbooks", href: "/collections/borderline" },
-    { label: "Client Services", href: "/" },
+    { label: "Retail", href: "/retail" },
+    { label: "Contact", href: "/contact" },
+    { label: "Size Guide", href: "/pages/size-guide" },
+    { label: "Returns", href: "/pages/returns-exchanges-and-refunds" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
   ];
 
   let isOpen = $state(false);
@@ -62,19 +61,16 @@
         Close
       </button>
 
-      <div class="flex items-center gap-5 text-ink">
-        <a href="/collections/shop-all" onclick={close} aria-label="Cart" class="mobile-menu-icon mobile-menu-icon--bag"></a>
-      </div>
-    </div>
-
-    <div class="px-7">
-      <label class="sr-only" for="mobile-menu-search">Search</label>
-      <input
-        id="mobile-menu-search"
-        type="search"
-        placeholder="Search for..."
-        class="w-full border-0 border-b border-ink bg-paper px-0 py-3 font-sans text-[12px] text-ink placeholder:text-muted focus:outline-none focus:ring-0"
-      />
+      <a href="/" onclick={close} class="inline-flex transition-opacity hover:opacity-70" aria-label="Revenant Edge home">
+        <img
+          src="/logo-mark-ink.png"
+          alt="Revenant Edge"
+          class="h-auto w-[6.75rem]"
+          width="2018"
+          height="616"
+          loading="eager"
+        />
+      </a>
     </div>
 
     <nav class="flex flex-col gap-1 px-7 py-6" aria-label="Main menu">
@@ -103,9 +99,6 @@
           class="flex items-center justify-between py-0.5 font-sans text-[13px] font-semibold leading-snug text-ink"
         >
           <span>{link.label}</span>
-          {#if link.label === "Client Services"}
-            <span aria-hidden="true">›</span>
-          {/if}
         </a>
       {/each}
 
@@ -115,49 +108,4 @@
 {/if}
 
 <style>
-  .mobile-menu-icon {
-    position: relative;
-    display: block;
-    height: 22px;
-    width: 22px;
-  }
-
-  .mobile-menu-icon--bookmark::before {
-    content: "";
-    position: absolute;
-    inset: 2px 5px 1px;
-    border: 1.5px solid currentColor;
-    border-bottom: 0;
-  }
-
-  .mobile-menu-icon--bookmark::after {
-    content: "";
-    position: absolute;
-    bottom: 1px;
-    left: 5px;
-    width: 12px;
-    height: 9px;
-    border-left: 1.5px solid currentColor;
-    border-right: 1.5px solid currentColor;
-    clip-path: polygon(0 0, 50% 45%, 100% 0, 100% 100%, 0 100%);
-  }
-
-  .mobile-menu-icon--bag::before {
-    content: "";
-    position: absolute;
-    inset: 7px 3px 2px;
-    border: 1.5px solid currentColor;
-  }
-
-  .mobile-menu-icon--bag::after {
-    content: "";
-    position: absolute;
-    left: 7px;
-    top: 2px;
-    width: 8px;
-    height: 8px;
-    border: 1.5px solid currentColor;
-    border-bottom: 0;
-    border-radius: 8px 8px 0 0;
-  }
 </style>

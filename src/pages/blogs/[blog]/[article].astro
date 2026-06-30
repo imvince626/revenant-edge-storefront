@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import CmsDocument from "../../../components/CmsDocument.astro";
+import NotFoundLayout from "../../../layouts/NotFoundLayout.astro";
+import { getArticleByHandle } from "../../../utils/shopify";
+import { setCache } from "../../../utils/cache";
+
+const { blog: blogHandle, article: articleHandle } = Astro.params;
+const headers = Astro.request.headers;
+const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
+const result =
+  blogHandle && articleHandle
+    ? await getArticleByHandle({ blogHandle, articleHandle, buyerIP: ip }).catch(() => null)
+    : null;
+
+if (!result) {
+  Astro.response.status = 404;
+}
+
+const article = result?.article;
+const description =
+  article?.seo?.description ?? article?.excerpt ?? `${article?.title ?? "Article"} from Revenant Edge.`;
+
+setCache.short(Astro);
+---
+
+{
+  !result || !article ? (
+    <NotFoundLayout title="Article not found" message="Article not found" />
+  ) : (
+    <BaseLayout title={`${article.title} | Revenant Edge`} description={description} solidHeader={true}>
+      <CmsDocument
+        eyebrow={result.blog.title}
+        title={article.title}
+        description={description}
+        body={article.contentHtml}
+        image={article.image}
+        publishedAt={article.publishedAt}
+      />
+    </BaseLayout>
+  )
+}

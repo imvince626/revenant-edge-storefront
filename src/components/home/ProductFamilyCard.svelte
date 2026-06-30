@@ -30,8 +30,33 @@
   let { title, colorways }: Props = $props();
   let selectedIndex = $state(0);
 
+  const PRODUCT_CARD_IMAGE_OVERRIDES: Record<
+    string,
+    {
+      image: ImageLike;
+      hoverImage?: ImageLike;
+    }
+  > = {
+    "light-within-the-dark-hoodie-black": {
+      image: {
+        url: "/images/product-overrides/light-within-the-dark-hoodie-back-white.png",
+        width: 1080,
+        height: 1080,
+        altText: "Light Within The Dark Hoodie Black Back",
+      },
+      hoverImage: {
+        url: "/images/product-overrides/light-within-the-dark-hoodie-front-white.png",
+        width: 1080,
+        height: 1080,
+        altText: "Light Within The Dark Hoodie Black Front",
+      },
+    },
+  };
+
   let selected = $derived(colorways[selectedIndex] ?? colorways[0]);
-  let hasHover = $derived(!!selected?.hoverImage);
+  let selectedImage = $derived(PRODUCT_CARD_IMAGE_OVERRIDES[selected?.handle]?.image ?? selected?.image);
+  let selectedHoverImage = $derived(PRODUCT_CARD_IMAGE_OVERRIDES[selected?.handle]?.hoverImage ?? selected?.hoverImage);
+  let hasHover = $derived(!!selectedHoverImage);
 
   function formatPrice(price: Money | undefined) {
     if (!price) return "";
@@ -44,6 +69,7 @@
 
   function imageUrl(image: ImageLike | null | undefined, width: number) {
     if (!image?.url) return "";
+    if (image.url.startsWith("/")) return image.url;
     return `${image.url}&width=${width}`;
   }
 </script>
@@ -52,12 +78,12 @@
   <article class="group block">
     <div class="relative aspect-[187/251] overflow-hidden bg-paper transition-all duration-[280ms] group-hover:z-10">
       <a href={`/products/${selected.handle}`} aria-label={`View ${title} in ${selected.color}`} class="block h-full w-full">
-        {#if selected.image}
+        {#if selectedImage}
           <img
-            src={imageUrl(selected.image, 900)}
-            alt={selected.image.altText || selected.title}
-            width={selected.image.width}
-            height={selected.image.height}
+            src={imageUrl(selectedImage, 900)}
+            alt={selectedImage.altText || selected.title}
+            width={selectedImage.width}
+            height={selectedImage.height}
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             class={[
@@ -68,12 +94,12 @@
           />
         {/if}
 
-        {#if selected.hoverImage}
+        {#if selectedHoverImage}
           <img
-            src={imageUrl(selected.hoverImage, 900)}
-            alt={selected.hoverImage.altText || `${selected.title} alternate view`}
-            width={selected.hoverImage.width}
-            height={selected.hoverImage.height}
+            src={imageUrl(selectedHoverImage, 900)}
+            alt={selectedHoverImage.altText || `${selected.title} alternate view`}
+            width={selectedHoverImage.width}
+            height={selectedHoverImage.height}
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             class="absolute inset-0 h-full w-full object-contain p-[12%] opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100 md:p-[14%]"
@@ -82,8 +108,7 @@
         {/if}
       </a>
 
-      <div class="absolute bottom-0 left-0 right-0 flex h-12 items-center justify-between border-t border-paper bg-paper px-4">
-        <p class="font-sans text-sm font-semibold text-ink">Now Live</p>
+      <div class="absolute bottom-0 left-0 right-0 flex h-12 items-center justify-end border-t border-paper bg-paper px-4">
         <a href={`/products/${selected.handle}`} aria-label={`Quick view ${selected.title}`} class="flex h-8 w-8 items-center justify-center font-sans text-2xl text-ink">
           +
         </a>

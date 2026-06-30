@@ -120,19 +120,8 @@ const isImage  = !isVideo && !!media?.src;
     class="relative z-10 flex h-full w-full flex-col items-center justify-center px-6 py-20 text-center"
     style="min-height: min(80vh, 760px);"
   >
-
-    <!-- Eyebrow -->
-    {eyebrow && (
-      <p
-        class="nav-label mb-8 uppercase"
-        style="color: rgba(255,255,255,0.60);"
-      >
-        {eyebrow}
-      </p>
-    )}
-
     <!-- Stacked collection links -->
-    <nav aria-label={eyebrow ?? "Collections"}>
+    <nav aria-label="Collections">
       <ul class="m-0 flex list-none flex-col items-center gap-2 p-0">
         {items.map((item) => (
           <li>

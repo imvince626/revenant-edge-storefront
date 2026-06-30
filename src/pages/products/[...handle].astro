@@ -2,17 +2,23 @@
 import { getProductByHandle } from "./../../utils/shopify";
 import { setCache } from "../../utils/cache";
 import { gmcId } from "../../utils/analytics";
+import { isCollection2ProductHandle } from "../../utils/collections";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import NotFoundLayout from "../../layouts/NotFoundLayout.astro";
 import AddToCartForm from "../../components/AddToCartForm.svelte";
 import ProductImageGallery from "../../components/ProductImageGallery.astro";
 import ProductInformations from "../../components/ProductInformations.astro";
+import ProductAccordions from "../../components/ProductAccordions.astro";
+import ProductFeatureSplit from "../../components/ProductFeatureSplit.astro";
 import ProductRecommendations from "../../components/ProductRecommendations.astro";
 import ProductReviews from "../../components/ProductReviews.astro";
-import ProductAccordions from "../../components/ProductAccordions.astro";
 
 const { handle } = Astro.params;
+if (handle && /-white$/i.test(handle)) {
+  return Astro.redirect(`/products/${handle.replace(/-white$/i, "-black")}`, 302);
+}
+
 const headers = Astro.request.headers;
 const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
 const product = await getProductByHandle({ handle: handle || "", buyerIP: ip });
@@ -34,6 +40,17 @@ const colorSwatches: Record<string, string> = {
   ash: "#D3D3D3",
   cream: "#E8E1D2",
 };
+const PRODUCT_SWATCH_IMAGE_OVERRIDES: Record<
+  string,
+  { url: string; width: number; height: number; altText: string }
+> = {
+  "light-within-the-dark-hoodie-black": {
+    url: "/images/product-overrides/light-within-the-dark-hoodie-back-white.png",
+    width: 1080,
+    height: 1080,
+    altText: "Light Within The Dark Hoodie Black Back",
+  },
+};
 
 function inferColor(input = "") {
   const source = input.toLowerCase();
@@ -49,6 +66,11 @@ function baseHandle(currentHandle = "") {
   return currentHandle.replace(/-(black|white|cobalt|storm|mushroom|ash|cream)$/i, "");
 }
 
+function productImageUrl(url: string, width: number) {
+  if (url.startsWith("/")) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}width=${width}`;
+}
+
 const inferredColor = product
   ? inferColor([
       product.title,
@@ -58,12 +80,14 @@ const inferredColor = product
     ].filter(Boolean).join(" "))
   : "Black";
 const colorOptions = product
-  ? ["Black", "White"].map((color) => ({
+  ? ["Black"].map((color) => ({
       color,
       href: `/products/${baseHandle(product.handle)}-${color.toLowerCase()}`,
       active: color.toLowerCase() === inferredColor.toLowerCase(),
       swatch: colorSwatches[color.toLowerCase()],
-      image: product.featuredImage
+      image: PRODUCT_SWATCH_IMAGE_OVERRIDES[product.handle]
+        ? PRODUCT_SWATCH_IMAGE_OVERRIDES[product.handle]
+        : product.featuredImage
         ? {
             ...product.featuredImage,
             url: product.featuredImage.url.replace(
@@ -74,32 +98,6 @@ const colorOptions = product
         : null,
     }))
   : [];
-
-const productImages = product?.images.nodes.filter(Boolean) ?? [];
-const storyImage = productImages[1] ?? productImages[0] ?? null;
-const mediaStripImages = [
-  productImages[2] ?? productImages[0] ?? null,
-  productImages[3] ?? productImages[1] ?? productImages[0] ?? null,
-  productImages[4] ?? productImages[0] ?? null,
-];
-const productDetails = [
-  {
-    title: "Premium Cotton Jersey",
-    body: "Soft jersey fabric with a substantial everyday hand feel.",
-  },
-  {
-    title: "Relaxed Silhouette",
-    body: "Designed to drape naturally through the body.",
-  },
-  {
-    title: "Screen Print Graphic",
-    body: "Artwork applied with a durable print finish.",
-  },
-  {
-    title: "Finished Construction",
-    body: "Clean seams and reinforced hems for daily wear.",
-  },
-];
 
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
@@ -142,6 +140,72 @@ const jsonLd = product && firstVariant
 // Serialise minimal product/variant data for the client-side view_item call
 const analyticsProduct = pdpProduct ? JSON.stringify(pdpProduct) : "null";
 const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "null";
+const productQuoteOverrides: Record<string, { label: string; quote: string }> = {
+  "children-of-the-sea-tee-black": {
+    label: "Whitebeard",
+    quote: "\"The One Piece is real!\"",
+  },
+  "drums-of-liberation-tee-black": {
+    label: "Luffy",
+    quote: "\"I'm gonna be King of the Pirates!\"",
+  },
+  "empty-throne-tee-black": {
+    label: "Doflamingo",
+    quote: "\"Whoever wins this war becomes justice!\"",
+  },
+  "king-of-hell-tee-black": {
+    label: "Zoro",
+    quote: "\"Nothing happened.\"",
+  },
+  "breathe-fight-rise-tee-black": {
+    label: "Tanjiro",
+    quote: "\"I can do it.\"",
+  },
+  "fear-nothing-tee-black": {
+    label: "Inosuke",
+    quote: "\"I'm the King of the Mountains!\"",
+  },
+  "light-within-the-dark-hoodie-black": {
+    label: "Nezuko",
+    quote: "\"I will never hurt them.\"",
+  },
+  "light-within-the-dark-tee-black": {
+    label: "Nezuko",
+    quote: "\"I will never hurt them.\"",
+  },
+  "no-regrets-tee-black": {
+    label: "Rengoku",
+    quote: "\"Live with your head held high.\"",
+  },
+  "set-your-heart-ablaze-tee-black": {
+    label: "Rengoku",
+    quote: "\"Set your heart ablaze.\"",
+  },
+  "the-fear-that-strikes-back-tee-black": {
+    label: "Tanjiro",
+    quote: "\"Don't run away!\"",
+  },
+};
+const productQuote = product ? productQuoteOverrides[product.handle] ?? null : null;
+const fitLabel = product?.title.toLowerCase().includes("hoodie")
+  ? "Oversized Pullover Hoodie"
+  : "Oversized Graphic Tee";
+const isCollection2Product = product ? isCollection2ProductHandle(product.handle) : false;
+const recommendationCollection = isCollection2Product
+  ? {
+      handle: "demon-slayer",
+      href: "/collections/demon-slayer",
+      heading: "More Collection 2",
+      group: "collection-2" as const,
+      ctaLabel: "Shop Collection 2",
+    }
+  : {
+      handle: "collection-1-children-of-the-sea",
+      href: "/collections/collection-1-children-of-the-sea",
+      heading: "More Collection 1",
+      group: "collection-1" as const,
+      ctaLabel: "Shop Collection 1",
+    };
 ---
 
 {
@@ -156,45 +220,52 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
         <div
           class="mx-auto grid max-w-[1920px] grid-cols-1 lg:grid-cols-2"
         >
-          <div class="w-full">
-            <ProductImageGallery images={product.images} />
+          <div class="min-w-0 w-full">
+            <ProductImageGallery images={product.images} productHandle={product.handle} />
           </div>
 
-          <aside class="border-t border-line bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-l lg:border-t-0">
-            <div class="flex min-h-full flex-col px-6 py-6 md:px-8 lg:px-[7.5vw] lg:py-[16vh]">
+          <aside class="min-w-0 bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-l lg:border-line">
+            <div class="flex min-h-full min-w-0 flex-col px-4 pb-8 pt-5 md:px-8 lg:px-[7.5vw] lg:py-[14vh]">
               <ProductInformations title={product.title} price={firstVariant?.price} />
 
-              <div class="mt-5 flex gap-1 text-sm text-ink" aria-label="Product rating">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
+              <div class="mt-7 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-2 text-sm text-ink" aria-label="Product rating">
+                  <span class="tracking-[0.08em]">★★★★★</span>
+                  <a href="#reviews" class="font-sans text-xs text-muted underline underline-offset-2">
+                    2 reviews
+                  </a>
+                </div>
               </div>
 
-              <div class="py-8">
-                <div class="mb-4 flex items-center justify-between">
+              {productQuote && (
+                <div class="mt-7 font-sans text-[13px] leading-snug text-muted">
+                  <p>
+                    {productQuote.quote}
+                  </p>
+                </div>
+              )}
+
+              <div class="py-7">
+                <div class="mb-5 flex items-center justify-between">
                   <div class="flex items-baseline gap-6">
                     <p class="font-sans text-sm font-semibold text-ink">Color</p>
-                    <p class="font-sans text-xs text-muted">{colorOptions.length}</p>
+                    <sup class="font-sans text-[10px] text-muted">{colorOptions.length}</sup>
                     <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
                   </div>
-                  <a href="/account" class="font-sans text-sm font-semibold text-muted">Add to Wishlist ♡</a>
                 </div>
-                <div class="flex items-center gap-2 overflow-x-auto">
+                <div class="flex items-center gap-1 overflow-x-auto">
                   {colorOptions.map((option) => (
                     <a
                       href={option.href}
                       aria-label={`View ${option.color}`}
                       aria-current={option.active ? "true" : undefined}
                       class:list={[
-                        "relative flex h-20 w-20 shrink-0 items-center justify-center bg-surface",
-                        option.active && "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-ink",
+                        "relative flex h-[5.2rem] w-[5.2rem] shrink-0 items-center justify-center bg-paper",
                       ]}
                     >
                       {option.image ? (
                         <img
-                          src={`${option.image.url}&width=220`}
+                          src={productImageUrl(option.image.url, 220)}
                           alt={`${product.title} in ${option.color}`}
                           width={option.image.width}
                           height={option.image.height}
@@ -209,10 +280,17 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
                       )}
                     </a>
                   ))}
+                  <a
+                    href="/collections/shop-all"
+                    class="ml-auto hidden shrink-0 items-center gap-4 px-4 font-sans text-sm font-semibold text-ink md:flex"
+                  >
+                    <span>More Colors</span>
+                    <span class="text-xl leading-none" aria-hidden="true">›</span>
+                  </a>
                 </div>
               </div>
 
-              <div class="border-t border-line py-6">
+              <div class="py-2">
                 <AddToCartForm
                   client:load
                   variantId={firstVariant?.id ?? ""}
@@ -223,86 +301,28 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
                 />
               </div>
 
-              <div class="grid border-t border-line text-ink">
+              <div class="grid text-ink">
                 {[
-                  ["Free shipping over $100", "Complimentary standard shipping on qualifying orders."],
-                  ["Ships from the USA", "Packed and fulfilled from our domestic studio."],
-                  ["Earn Revenant points", "Members earn points on every order."],
-                  ["Pay in installments", "Flexible payment options available at checkout."],
-                ].map(([title, body]) => (
-                  <div class="flex items-center justify-between gap-5 border-b border-line bg-paper px-0 py-4">
-                    <div>
+                  ["🇺🇸", "Free shipping over $100"],
+                  ["⌁", "Ships from Los Angeles, CA"],
+                  ["USA", "100% made in USA cotton with screenprinted graphics"],
+                ].map(([icon, title]) => (
+                  <div class="flex items-center justify-between gap-5 bg-paper py-3">
+                    <div class="flex items-center gap-8">
+                      <span class="w-5 text-center font-display text-sm font-bold text-ink" aria-hidden="true">{icon}</span>
                       <p class="font-sans text-sm font-semibold">{title}</p>
-                      <p class="mt-1 font-sans text-xs leading-relaxed text-muted">{body}</p>
                     </div>
                     <span class="font-sans text-lg text-ink" aria-hidden="true">›</span>
                   </div>
                 ))}
               </div>
 
-              <div class="mt-auto pt-12">
+              <div class="mt-8 lg:mt-10">
                 <ProductAccordions />
               </div>
             </div>
           </aside>
         </div>
-      </section>
-
-      <section class="grid grid-cols-1 border-t border-line lg:grid-cols-2">
-        <div class="flex min-h-[720px] items-center justify-center bg-paper px-8 py-20 text-center lg:px-16">
-          <div class="grid max-w-[26rem] gap-16">
-            {productDetails.map((detail) => (
-              <div>
-                <h2 class="font-sans text-base font-semibold text-ink">{detail.title}</h2>
-                <p class="mt-5 font-sans text-sm leading-relaxed text-muted">{detail.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div class="min-h-[720px] overflow-hidden bg-surface">
-          {storyImage ? (
-            <img
-              src={`${storyImage.url}&width=1400`}
-              alt={storyImage.altText || `${product.title} lifestyle media`}
-              width={storyImage.width}
-              height={storyImage.height}
-              loading="lazy"
-              class="h-full w-full object-cover"
-            />
-          ) : (
-            <div class="flex h-full min-h-[720px] items-center justify-center px-8 text-center">
-              <p class="font-sans text-sm text-muted">Add product video or lifestyle media here.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section class="grid grid-cols-1 border-t border-line md:grid-cols-3">
-        {mediaStripImages.map((image, index) => (
-          <div class="min-h-[520px] overflow-hidden bg-surface">
-            {image ? (
-              <img
-                src={`${image.url}&width=1100`}
-                alt={image.altText || `${product.title} detail ${index + 1}`}
-                width={image.width}
-                height={image.height}
-                loading="lazy"
-                class="h-full w-full object-cover"
-              />
-            ) : (
-              <div class="flex h-full min-h-[520px] items-center justify-center px-8 text-center">
-                <p class="font-sans text-sm text-muted">Add product detail media here.</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </section>
-
-      <section>
-        <ProductRecommendations productId={product.id} buyerIP={ip} heading="Style With" />
-        <ProductRecommendations productId={product.id} buyerIP={ip} heading="You May Also Like" />
-        <ProductReviews productTitle={product.title} />
       </section>
 
       {/*
@@ -325,6 +345,18 @@ const analyticsVariant = pdpFirstVariant ? JSON.stringify(pdpFirstVariant) : "nu
           // parse failure — analytics non-blocking
         }
       </script>
+
+      <ProductFeatureSplit productHandle={product.handle} />
+      <ProductRecommendations
+        productId={product.id}
+        buyerIP={ip}
+        heading={recommendationCollection.heading}
+        collectionHandle={recommendationCollection.handle}
+        collectionHref={recommendationCollection.href}
+        collectionGroup={recommendationCollection.group}
+        ctaLabel={recommendationCollection.ctaLabel}
+      />
+      <ProductReviews productTitle={product.title} />
     </BaseLayout>
   )
 }

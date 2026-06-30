@@ -74,6 +74,7 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    overflow-x: clip;
   }
 
   /* ── Base body: brand fonts + ink/paper ── */
@@ -84,6 +85,7 @@
     background-color: var(--color-paper);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
   }
 
   main {
@@ -94,7 +96,7 @@
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
     line-height: 1.07;
   }
 
@@ -147,5 +149,70 @@
   [data-theme="dark"] {
     background-color: var(--color-ink);
     color: var(--color-paper);
+  }
+
+  .cms-content {
+    @apply font-sans text-sm leading-relaxed text-muted md:text-base;
+  }
+
+  .cms-content > * + * {
+    margin-top: 1rem;
+  }
+
+  .cms-content h1,
+  .cms-content h2,
+  .cms-content h3,
+  .cms-content h4 {
+    margin-top: 2rem;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+
+  .cms-content a {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .cms-content ul,
+  .cms-content ol {
+    padding-left: 1.25rem;
+  }
+
+  .cms-content ul {
+    list-style: disc;
+  }
+
+  .cms-content ol {
+    list-style: decimal;
+  }
+
+  .cms-content table {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+    color: var(--color-muted);
+  }
+
+  .cms-content th,
+  .cms-content td {
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.85rem 0.75rem 0.85rem 0;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .cms-content th {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  .cms-content :where(.table-wrapper),
+  .cms-content :has(> table) {
+    overflow-x: auto;
   }
 }

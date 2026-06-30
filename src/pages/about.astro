@@ -1,0 +1,70 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { setCache } from "../utils/cache";
+
+const title = "Behind the Brand";
+const description =
+  "Revenant Edge is a Los Angeles-based apparel brand making limited anime-inspired graphic tees and hoodies.";
+
+setCache.short(Astro);
+---
+
+<BaseLayout title={`${title} | Revenant Edge`} description={description} solidHeader={true}>
+  <section class="bg-paper text-ink">
+    <div class="grid min-h-[calc(100svh-98px)] border-t border-line lg:grid-cols-[minmax(0,46fr)_minmax(0,54fr)]">
+      <div class="flex items-end px-6 py-14 md:px-10 md:py-20 lg:px-12">
+        <div class="max-w-[38rem]">
+          <h1 class="font-display text-[clamp(3rem,8vw,6.5rem)] font-bold uppercase leading-[0.9] tracking-normal">
+            Behind the Brand
+          </h1>
+          <p class="mt-8 font-sans text-lg leading-relaxed text-muted md:text-xl">
+            Revenant Edge is a Los Angeles-based apparel brand built around limited graphic drops, heavyweight blanks, and artwork inspired by the stories we grew up with.
+          </p>
+        </div>
+      </div>
+
+      <div class="min-h-[28rem] overflow-hidden bg-ink lg:min-h-0">
+        <img
+          src="/images/behind-the-brand-los-angeles.jpg"
+          alt="Los Angeles skyline at golden hour"
+          width="4480"
+          height="5600"
+          class="h-full w-full object-cover"
+          loading="eager"
+        />
+      </div>
+    </div>
+
+    <div class="mx-auto max-w-4xl px-6 py-16 md:px-10 md:py-24">
+      <div class="grid gap-10 font-sans text-base leading-relaxed text-ink md:text-lg">
+        <p>
+          Each piece starts as a wearable tribute: a clean everyday silhouette, a bold screenprint, and a design that feels like it belongs to the character, arc, or moment behind it.
+        </p>
+        <p>
+          We keep the collections focused. No filler, no oversized catalog, no random graphics. Just limited-run tees and hoodies made for people who want their clothes to carry a story.
+        </p>
+
+        <div class="grid gap-px bg-line md:grid-cols-3">
+          <div class="bg-paper p-5">
+            <h2 class="font-sans text-sm font-semibold text-ink">Limited Drops</h2>
+            <p class="mt-3 text-sm leading-relaxed text-muted">
+              Small releases built around focused collections.
+            </p>
+          </div>
+          <div class="bg-paper p-5">
+            <h2 class="font-sans text-sm font-semibold text-ink">Screenprinted Graphics</h2>
+            <p class="mt-3 text-sm leading-relaxed text-muted">
+              Heavy artwork on the front and back of each piece.
+            </p>
+          </div>
+          <div class="bg-paper p-5">
+            <h2 class="font-sans text-sm font-semibold text-ink">Ships From LA</h2>
+            <p class="mt-3 text-sm leading-relaxed text-muted">
+              Packed and shipped from Los Angeles, California.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

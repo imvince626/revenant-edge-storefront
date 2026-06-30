@@ -1,14 +1,7 @@
 ---
-// NOTE: homepage view_item_list analytics dropped with the Products grid; re-add per-carousel later (see ProductCarousel TODO).
-
 import { getCollectionByHandle } from "../utils/shopify";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroFullBleed from "../components/home/HeroFullBleed.astro";
-import ProductCarousel from "../components/home/ProductCarousel.astro";
-import EditorialBanner from "../components/home/EditorialBanner.astro";
-import SplitBanner from "../components/home/SplitBanner.astro";
-import CategoryGrid from "../components/home/CategoryGrid.astro";
-import CollectionsMenu from "../components/home/CollectionsMenu.astro";
+import HomeMediaPanel from "../components/home/HomeMediaPanel.astro";
 import NewsletterModal from "../components/home/NewsletterModal.svelte";
 import { setCache } from "../utils/cache";
 
@@ -30,171 +23,65 @@ async function safeCollection(handle: string) {
 }
 
 // ── Parallel fetches ──────────────────────────────────────────────────────────
-const [newArrivals, demonSlayer, childrenOfTheSea, cursed, borderline, hoodies, tees] =
+const [demonSlayer] =
   await Promise.all([
-    safeCollection("collection-2-children-of-the-sea-all"),
     safeCollection("demon-slayer"),
-    safeCollection("collection-1-children-of-the-sea"),
-    safeCollection("cursed-collection"),
-    safeCollection("borderline"),
-    safeCollection("hoodies"),
-    safeCollection("tees"),
   ]);
-
-// ── Carousel guard — render only if ≥ 3 published products ───────────────────
-const hasRow = (c: typeof newArrivals) => !!c && c.products.nodes.length >= 3;
 
 // ── Convert collection image to BannerMedia for editorial sections ─────────────
 // Returns undefined when the collection has no image; components render their
 // built-in placeholder in that case.
-const bannerMedia = (c: typeof newArrivals) =>
+const bannerMedia = (c: typeof demonSlayer) =>
   c?.image
     ? { src: c.image.url, alt: c.image.altText ?? c.title }
     : undefined;
+
+const panels = [
+  {
+    media: {
+      type: "video" as const,
+      webm: "/hero-loop.webm",
+      mp4: "/hero-loop.mp4",
+      poster: "/hero-loop-poster.jpg",
+    },
+    eyebrow: "Now Live",
+    title: "Children of the Sea Collection",
+    cta: { label: "SHOP NOW", href: "/collections/collection-1-children-of-the-sea" },
+    priority: true,
+  },
+  {
+    media: {
+      type: "video" as const,
+      mp4: "/videos/demon-slayer-home.mp4",
+      poster: bannerMedia(demonSlayer)?.src ?? "/hero-loop-poster.jpg",
+    },
+    eyebrow: "Set Your Heart Ablaze",
+    title: "Demon Slayer Collection",
+    cta: { label: "NOW LIVE", href: "/collections/demon-slayer" },
+  },
+  {
+    media: {
+      src: "/images/behind-the-brand-los-angeles.jpg",
+      alt: "Los Angeles skyline at golden hour",
+    },
+    eyebrow: "Behind the Brand",
+    title: "About Revenant Edge",
+    cta: { label: "LEARN MORE", href: "/about" },
+  },
+];
 ---
 
 <BaseLayout title="Revenant Edge — Hand-Finished Apparel" solidHeader={false}>
-
-  <!-- 1 ── HERO ─────────────────────────────────────────────────────────────── -->
-  <HeroFullBleed
-    title="Children of the Sea Collection"
-    subtitle="Now Live"
-    ctas={[
-      { label: "Shop Now", href: "/collections/collection-1-children-of-the-sea", variant: "solid" },
-    ]}
-    align="bottom-left"
-  />
-
-  <!-- 2 ── New Arrivals Carousel (conditional) ─────────────────────────────── -->
-  {hasRow(newArrivals) && (
-    <ProductCarousel
-      heading="Now Live"
-      products={newArrivals!.products.nodes}
-      ctaLabel="Shop New Arrivals"
-      ctaHref="/collections/collection-2-children-of-the-sea-all"
+  {panels.map((panel) => (
+    <HomeMediaPanel
+      media={panel.media}
+      eyebrow={panel.eyebrow}
+      title={panel.title}
+      cta={panel.cta}
+      priority={panel.priority}
     />
-  )}
+  ))}
 
-  <!-- 3 ── Editorial Banner: Set Your Heart Ablaze ──────────────────────────── -->
-  <EditorialBanner
-    media={bannerMedia(demonSlayer)}
-    eyebrow="Featured"
-    title="Set Your Heart Ablaze"
-    ctas={[{ label: "Shop Collection", href: "/collections/demon-slayer" }]}
-    align="bottom-center"
-    height="tall"
-  />
-
-  <!-- 4 ── Demon Slayer Carousel (conditional) ─────────────────────────────── -->
-  {hasRow(demonSlayer) && (
-    <ProductCarousel
-      heading="Demon Slayer"
-      products={demonSlayer!.products.nodes}
-      ctaLabel="Shop Now"
-      ctaHref="/collections/demon-slayer"
-    />
-  )}
-
-  <!-- 5 ── Editorial Banner: Children of the Sea ────────────────────────────── -->
-  <EditorialBanner
-    media={bannerMedia(childrenOfTheSea)}
-    eyebrow="Fresh Drop"
-    title="Children of the Sea"
-    ctas={[{ label: "Explore Collection", href: "/collections/collection-1-children-of-the-sea" }]}
-    align="bottom-left"
-    height="medium"
-  />
-
-  <!-- 6 ── Children of the Sea Carousel (conditional) ─────────────────────── -->
-  {hasRow(childrenOfTheSea) && (
-    <ProductCarousel
-      heading="Limited Edition"
-      products={childrenOfTheSea!.products.nodes}
-      ctaLabel="View Styles"
-      ctaHref="/collections/collection-1-children-of-the-sea"
-    />
-  )}
-
-  <!-- 7 ── Category Grid (2 × 2, always renders) ───────────────────────────── -->
-  <CategoryGrid
-    tiles={[
-      {
-        image: tees?.image ? { url: tees.image.url, alt: tees.image.altText ?? "Tees" } : undefined,
-        label: "TEES",
-        href: "/collections/tees",
-      },
-      {
-        image: hoodies?.image ? { url: hoodies.image.url, alt: hoodies.image.altText ?? "Hoodies" } : undefined,
-        label: "HOODIES",
-        href: "/collections/hoodies",
-      },
-      {
-        image: childrenOfTheSea?.image
-          ? { url: childrenOfTheSea.image.url, alt: childrenOfTheSea.image.altText ?? "Children of the Sea" }
-          : undefined,
-        label: "CHILDREN OF THE SEA",
-        href: "/collections/collection-1-children-of-the-sea",
-      },
-      {
-        image: borderline?.image
-          ? { url: borderline.image.url, alt: borderline.image.altText ?? "Exploring the Borderline" }
-          : undefined,
-        label: "EXPLORING THE BORDERLINE",
-        href: "/collections/borderline",
-      },
-    ]}
-  />
-
-  <!-- 8 ── Editorial Banner: Cursed Collection ──────────────────────────────── -->
-  <EditorialBanner
-    media={bannerMedia(cursed)}
-    eyebrow="Exclusive"
-    title="Cursed Collection"
-    ctas={[{ label: "Shop Limited", href: "/collections/cursed-collection" }]}
-    align="bottom-center"
-    height="medium"
-  />
-
-  <!-- 9 ── Borderline Carousel (conditional) ──────────────────────────────── -->
-  {hasRow(borderline) && (
-    <ProductCarousel
-      heading="Rare Finds"
-      products={borderline!.products.nodes}
-      ctaLabel="Browse Now"
-      ctaHref="/collections/borderline"
-    />
-  )}
-
-  <!-- 10 ── Split Banner: Hoodies / Tees (always renders) ─────────────────── -->
-  <SplitBanner
-    left={{
-      media:   bannerMedia(hoodies),
-      eyebrow: "Premium Comfort",
-      title:   "Hoodies",
-      cta:     { label: "Shop Hoodies", href: "/collections/hoodies" },
-    }}
-    right={{
-      media:   bannerMedia(tees),
-      eyebrow: "Core Collection",
-      title:   "Tees",
-      cta:     { label: "Shop Tees", href: "/collections/tees" },
-    }}
-  />
-
-  <!-- 11 ── Collections Menu (always renders) ──────────────────────────────── -->
-  <CollectionsMenu
-    media={bannerMedia(newArrivals)}
-    eyebrow="Explore Collections"
-    items={[
-      { label: "New Arrivals",         href: "/collections/collection-2-children-of-the-sea-all" },
-      { label: "Best Sellers",         href: "/collections/best-seller" },
-      { label: "Children of the Sea",  href: "/collections/collection-1-children-of-the-sea" },
-      { label: "Set Your Heart Ablaze",href: "/collections/demon-slayer" },
-    ]}
-    cta={{ label: "Shop All", href: "/collections/shop-all" }}
-  />
-
-  <!-- 12 ── Newsletter Modal (client island — fires once after 1.6 s idle) ── -->
   <NewsletterModal client:idle discount="15%" delayMs={1600} />
 
 </BaseLayout>

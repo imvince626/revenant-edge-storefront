@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CmsDocument from "../../components/CmsDocument.astro";
+import NotFoundLayout from "../../layouts/NotFoundLayout.astro";
+import { getPageByHandle, getPolicyByHandle } from "../../utils/shopify";
+import { setCache } from "../../utils/cache";
+
+const { handle } = Astro.params;
+const headers = Astro.request.headers;
+const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
+
+const policyAliases = {
+  "privacy-policy": "privacy-policy",
+  "terms-of-service": "terms-of-service",
+  "refund-policy": "refund-policy",
+} as const;
+
+const page = handle
+  ? await getPageByHandle({ handle, buyerIP: ip }).catch(() => null)
+  : null;
+const policyHandle = handle && handle in policyAliases
+  ? policyAliases[handle as keyof typeof policyAliases]
+  : null;
+const policy = !page && policyHandle
+  ? await getPolicyByHandle({ handle: policyHandle, buyerIP: ip }).catch(() => null)
+  : null;
+const document = page ?? policy;
+
+if (!document) {
+  Astro.response.status = 404;
+}
+
+const title = document?.title ?? "Page not found";
+const body = document && "body" in document ? document.body : "";
+const description =
+  (page?.seo?.description || page?.bodySummary) ??
+  (document ? `${document.title} from Revenant Edge.` : "Page not found.");
+
+setCache.short(Astro);
+---
+
+{
+  !document ? (
+    <NotFoundLayout title="Page not found" message="Page not found" />
+  ) : (
+    <BaseLayout title={`${title} | Revenant Edge`} description={description} solidHeader={true}>
+      <CmsDocument eyebrow="Info" title={title} description={description} body={body} />
+    </BaseLayout>
+  )
+}

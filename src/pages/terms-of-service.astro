@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CmsDocument from "../components/CmsDocument.astro";
+import { getPageByHandle, getPolicyByHandle } from "../utils/shopify";
+import { setCache } from "../utils/cache";
+
+const headers = Astro.request.headers;
+const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
+const page = await getPageByHandle({ handle: "terms-of-service", buyerIP: ip }).catch(() => null);
+const policy = page ? null : await getPolicyByHandle({ handle: "terms-of-service", buyerIP: ip }).catch(() => null);
+const title = page?.title ?? policy?.title ?? "Terms of Service";
+const body = page?.body ?? policy?.body ?? "";
+const description =
+  page?.seo?.description ??
+  page?.bodySummary ??
+  "Terms and conditions for using the Revenant Edge storefront.";
+
+setCache.short(Astro);
+---
+
+<BaseLayout title={`${title} | Revenant Edge`} description={description} solidHeader={true}>
+  <CmsDocument eyebrow="Policy" title={title} description={description} body={body} />
+</BaseLayout>

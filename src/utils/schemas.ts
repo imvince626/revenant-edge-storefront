@@ -89,3 +89,55 @@ export const CollectionResult = z
     }),
   })
   .nullable();
+
+export const SeoResult = z
+  .object({
+    title: z.string().nullable().optional(),
+    description: z.string().nullable().optional(),
+  })
+  .nullable()
+  .optional();
+
+export const PageResult = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    handle: z.string(),
+    body: z.string().nullable().optional(),
+    bodySummary: z.string().nullable().optional(),
+    seo: SeoResult,
+  })
+  .nullable();
+
+export const PolicyResult = z
+  .object({
+    title: z.string(),
+    handle: z.string(),
+    body: z.string(),
+  })
+  .nullable();
+
+export const ArticleResult = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    handle: z.string(),
+    excerpt: z.string().nullable().optional(),
+    excerptHtml: z.string().nullable().optional(),
+    contentHtml: z.string().nullable().optional(),
+    publishedAt: z.string().nullable().optional(),
+    image: ImageResult,
+    seo: SeoResult,
+  })
+  .nullable();
+
+export const BlogResult = z
+  .object({
+    title: z.string(),
+    handle: z.string(),
+    seo: SeoResult,
+    articles: z.object({
+      nodes: z.array(ArticleResult),
+    }),
+  })
+  .nullable();

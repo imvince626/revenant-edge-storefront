@@ -1,0 +1,80 @@
+---
+import { isCollection2ProductHandle } from "../utils/collections";
+
+export interface Props {
+  productHandle: string;
+}
+
+const { productHandle } = Astro.props as Props;
+
+const isCollection2 = isCollection2ProductHandle(productHandle);
+const media = isCollection2
+  ? {
+      src: "/videos/demon-slayer-home.mp4",
+      poster: "/hero-loop-poster.jpg",
+    }
+  : {
+      src: "/hero-loop.mp4",
+      poster: "/hero-loop-poster.jpg",
+    };
+
+type Feature = [string, string | string[]];
+
+const constructionDetails = [
+  "Premium heavyweight Revenant Edge blank t-shirt 100% cotton",
+  "Heavy screenprint on back and front",
+  "Made in USA",
+];
+
+const features = isCollection2
+  ? [
+      ["Limited Edition Artwork", "Designed by Jimmy Wong"],
+      ["Collection 2", "Inspired by Demon Slayer"],
+      ["Everyday Oversized Fit", constructionDetails],
+    ]
+  : [
+      ["Limited Edition Artwork", "Designed by Jimmy Wong"],
+      ["Collection 1 Energy", "Inspired by One Piece"],
+      ["Everyday Oversized Fit", constructionDetails],
+    ] satisfies Feature[];
+---
+
+<section class="grid border-t border-line bg-paper text-ink lg:grid-cols-2">
+  <div class="relative flex min-h-[32rem] items-center justify-center overflow-hidden px-8 py-16 md:min-h-[38rem]">
+    <span
+      class="pointer-events-none absolute -left-[7vw] top-1/2 -translate-y-1/2 font-display text-[28rem] font-bold leading-none text-surface md:text-[38rem]"
+      aria-hidden="true"
+    >
+      R
+    </span>
+    <div class="relative z-10 grid max-w-md gap-14 text-center">
+      {features.map(([title, body]) => (
+        <div>
+          <h2 class="font-sans text-xl font-semibold leading-tight text-ink">{title}</h2>
+          {Array.isArray(body) ? (
+            <ul class="mt-5 grid gap-2 font-sans text-sm leading-relaxed text-ink">
+              {body.map((item) => (
+                <li>- {item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-5 font-sans text-sm leading-relaxed text-ink">{body}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="min-h-[32rem] overflow-hidden bg-surface md:min-h-[38rem]">
+    <video
+      class="h-full min-h-[32rem] w-full object-cover md:min-h-[38rem]"
+      autoplay
+      muted
+      loop
+      playsinline
+      poster={media.poster}
+    >
+      <source src={media.src} type="video/mp4" />
+    </video>
+  </div>
+</section>

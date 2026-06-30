@@ -1,21 +1,4 @@
 ---
-/**
- * HeroFullBleed.astro — Revenant Edge full-bleed editorial hero
- *
- * Edge-to-edge section with looping background video, a dark scrim, and
- * overlaid eyebrow/title/subtitle/CTAs. Positioning follows the `align` prop:
- *   "center"      — content centred horizontally and vertically
- *   "bottom-left" — content anchored bottom-left (REPRESENT-style)
- *
- * Video: /hero-loop.webm + /hero-loop.mp4, poster /hero-loop-poster.jpg
- * Reduced-motion: video hidden, poster shown.
- * The transparent header renders over this section unchanged.
- *
- * Design tokens: ink, paper, ember, font-display, font-sans, .nav-label,
- *   --ease-standard, --duration-standard, --color-ember, --color-ink, --color-paper,
- *   --color-muted.
- */
-
 export interface HeroCta {
   label: string;
   href: string;
@@ -27,7 +10,7 @@ export interface Props {
   title?: string;
   subtitle?: string;
   ctas?: HeroCta[];
-  align?: "center" | "bottom-left"; // default "center"
+  align?: "center" | "bottom-left";
 }
 
 const {
@@ -47,8 +30,6 @@ const isCenter = align === "center";
   aria-label="Hero"
 >
 
-  <!-- ── BACKGROUND VIDEO ────────────────────────────────────────────────── -->
-  <!-- aria-hidden: purely decorative; poster conveys the still frame -->
   <style>
     @media (prefers-reduced-motion: reduce) {
       .herofb-video  { display: none !important; }
@@ -70,7 +51,6 @@ const isCenter = align === "center";
     <source src="/hero-loop.mp4"  type="video/mp4" />
   </video>
 
-  <!-- Poster fallback for reduced-motion (hidden by default) -->
   <img
     src="/hero-loop-poster.jpg"
     alt=""
@@ -78,14 +58,12 @@ const isCenter = align === "center";
     aria-hidden="true"
   />
 
-  <!-- ── DARK SCRIM (keeps paper text legible) ───────────────────────────── -->
   <div
     class="pointer-events-none absolute inset-0"
     style="background-color: color-mix(in srgb, var(--color-ink) 45%, transparent);"
     aria-hidden="true"
   ></div>
 
-  <!-- ── CONTENT ─────────────────────────────────────────────────────────── -->
   <div
     class:list={[
       "relative z-10 flex h-full w-full",
@@ -99,36 +77,26 @@ const isCenter = align === "center";
       class:list={[
         isCenter
           ? "flex flex-col items-center px-6 py-20"
-          : "flex flex-col items-start px-6 pb-12 md:px-12 md:pb-16",
+          : "hero-copy hero-copy--bottom flex flex-col items-start px-10 pb-[4.9rem] md:px-12 md:pb-16",
       ]}
       style="max-width: 72ch;"
     >
-
-      <!-- Eyebrow -->
-      {eyebrow && (
-        <p
-          class="nav-label mb-5"
-          style="color: var(--color-ember);"
-        >
-          {eyebrow}
-        </p>
-      )}
-
-      <!-- Title -->
       {title && (
         <h1
-          class="font-display m-0 font-bold uppercase text-paper"
+          class:list={[
+            "font-display m-0 font-bold text-paper",
+            isCenter ? "uppercase" : "",
+          ]}
           style={`
-            font-size: clamp(2.75rem, 6vw, 6rem);
-            letter-spacing: -0.03em;
-            line-height: 1.0;
+            font-size: ${isCenter ? "clamp(2.75rem, 6vw, 6rem)" : "clamp(1.34rem, 2.5vw, 2.15rem)"};
+            letter-spacing: 0;
+            line-height: ${isCenter ? "1.0" : "1.05"};
           `}
         >
           {title}
         </h1>
       )}
 
-      <!-- Subtitle -->
       {subtitle && (
         <p
           class="font-sans mt-6"
@@ -143,9 +111,8 @@ const isCenter = align === "center";
         </p>
       )}
 
-      <!-- CTAs -->
       {ctas.length > 0 && (
-        <div class:list={["mt-8 flex flex-wrap gap-4", isCenter ? "justify-center" : ""]}>
+        <div class:list={[isCenter ? "mt-8 flex flex-wrap gap-4 justify-center" : "mt-6 flex flex-wrap gap-3"]}>
           {ctas.map((cta) =>
             cta.variant === "outline" ? (
               <a
@@ -158,7 +125,7 @@ const isCenter = align === "center";
                     border-color var(--duration-standard) var(--ease-standard),
                     color var(--duration-standard) var(--ease-standard);
                 `}
-                class="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-widest hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+                class="inline-block px-8 py-4 text-sm font-semibold uppercase hover:border-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
               >
                 {cta.label}
               </a>
@@ -167,11 +134,14 @@ const isCenter = align === "center";
                 href={cta.href}
                 style={`
                   font-family: var(--font-display);
-                  color: var(--color-ink);
-                  background-color: var(--color-paper);
+                  color: ${isCenter ? "var(--color-ink)" : "var(--color-paper)"};
+                  background-color: ${isCenter ? "var(--color-paper)" : "color-mix(in srgb, var(--color-muted) 78%, var(--color-ink))"};
                   transition: opacity var(--duration-standard) var(--ease-standard);
                 `}
-                class="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-widest hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+                class:list={[
+                  "inline-block font-semibold uppercase hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink",
+                  isCenter ? "px-8 py-4 text-sm" : "px-7 py-4 text-[0.72rem]",
+                ]}
               >
                 {cta.label}
               </a>
@@ -181,7 +151,7 @@ const isCenter = align === "center";
       )}
 
     </div>
-  </div><!-- /content -->
+  </div>
 
 </section>
 

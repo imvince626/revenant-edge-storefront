@@ -65,6 +65,7 @@
     <div class="fixed inset-0 overflow-hidden">
       <div class="absolute inset-0 overflow-hidden">
         <div
+          role="document"
           class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full focus:outline-none"
           tabindex="-1"
           use:clickOutside={() => closeCartDrawer()}

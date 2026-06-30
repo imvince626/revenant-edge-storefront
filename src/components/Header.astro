@@ -15,6 +15,19 @@ interface Props {
 }
 
 const { solidFromTop = false } = Astro.props;
+
+const featuredLinks = [
+  { label: "Children of the Sea", href: "/collections/collection-1-children-of-the-sea" },
+  { label: "Demon Slayer", href: "/collections/demon-slayer" },
+  { label: "Lookbook", href: "/blogs/lookbook" },
+];
+
+const collectionLinks = [
+  { label: "Shop Children of the Sea", href: "/collections/collection-1-children-of-the-sea" },
+  { label: "Shop Demon Slayer", href: "/collections/demon-slayer" },
+  { label: "Lookbook", href: "/blogs/lookbook" },
+  { label: "Behind the Brand", href: "/about" },
+];
 ---
 
 <header
@@ -29,8 +42,40 @@ const { solidFromTop = false } = Astro.props;
   <div class="mx-auto flex h-16 max-w-none items-center px-4 md:px-6 lg:px-8">
 
     <nav class="hidden flex-1 items-center gap-4 lg:gap-6 md:flex" aria-label="Primary navigation">
-      <a href="/collections/shop-all" class="nav-label header-nav-link">Shop</a>
-      <a href="/collections/collection-1-children-of-the-sea" class="nav-label header-nav-link">Children of the Sea</a>
+      <div class="mega-trigger" data-mega-trigger>
+        <a href="/collections/shop-all" class="nav-label header-nav-link header-nav-link--active">Shop</a>
+        <div class="mega-menu" aria-label="Shop menu">
+          <div class="mega-menu__inner">
+            <div class="mega-menu__links">
+              <div class="grid gap-5">
+                {featuredLinks.map((link) => (
+                  <a href={link.href} class="mega-menu__featured-link">{link.label}</a>
+                ))}
+              </div>
+
+              <div class="mt-20">
+                <div class="grid gap-5">
+                  {collectionLinks.map((link) => (
+                    <a href={link.href} class="mega-menu__sub-link">
+                      <span>{link.label}</span>
+                      {["Shop Children of the Sea", "Shop Demon Slayer"].includes(link.label) && (
+                        <span aria-hidden="true">›</span>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <a href="/collections/collection-1-children-of-the-sea" class="mega-menu__preview">
+              <img src="/hero-loop-poster.jpg" alt="Children of the Sea collection preview" loading="eager" />
+              <div class="mega-menu__preview-copy">
+                <h2>Children of the Sea Collection</h2>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
     </nav>
 
     <div class="flex flex-1 items-center md:hidden">
@@ -64,9 +109,9 @@ const { solidFromTop = false } = Astro.props;
 
     <div class="flex flex-1 items-center justify-end gap-4 lg:gap-6">
       <nav class="hidden items-center gap-4 lg:gap-6 md:flex" aria-label="Secondary navigation">
-        <a href="/collections/tees" class="nav-label header-nav-link">Retail</a>
-        <a href="/" class="nav-label header-nav-link">About Us</a>
-        <a href="/collections/shop-all" class="nav-label header-nav-link">US / USD</a>
+        <a href="/retail" class="nav-label header-nav-link">Retail</a>
+        <a href="/about" class="nav-label header-nav-link">About Us</a>
+        <span class="nav-label header-nav-link">US / USD</span>
       </nav>
 
       <CartIcon client:load />
@@ -132,4 +177,172 @@ const { solidFromTop = false } = Astro.props;
   .header-nav-link:hover {
     opacity: 0.8;
   }
+
+  .mega-trigger {
+    display: flex;
+    height: 4rem;
+    align-items: center;
+  }
+
+  .mega-trigger::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 49;
+    height: 1rem;
+  }
+
+  .mega-menu {
+    pointer-events: none;
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 48;
+    max-height: calc(100vh - var(--announcement-bar-height, 34px) - 4rem);
+    overflow-y: auto;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    transition:
+      opacity 220ms var(--ease-standard) 120ms,
+      transform 220ms var(--ease-standard) 120ms,
+      visibility 0ms linear 340ms;
+  }
+
+  .mega-trigger:hover::after,
+  .mega-trigger:focus-within::after {
+    pointer-events: auto;
+  }
+
+  .mega-trigger:hover .mega-menu,
+  .mega-trigger:focus-within .mega-menu,
+  .mega-trigger.is-open .mega-menu {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0ms, 0ms, 0ms;
+  }
+
+  .mega-menu__inner {
+    display: grid;
+    grid-template-columns: minmax(22rem, 30vw) 1fr;
+    min-height: min(72vh, 48rem);
+  }
+
+  .mega-menu__links {
+    border-right: 1px solid var(--color-line);
+    padding: 3.25rem 2rem 4rem;
+  }
+
+  .mega-menu__featured-link {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1.55rem, 2.4vw, 2.15rem);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+    transition: opacity 160ms var(--ease-standard);
+  }
+
+  .mega-menu__featured-link:hover,
+  .mega-menu__sub-link:hover {
+    opacity: 0.55;
+  }
+
+  .mega-menu__sub-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.1;
+    transition: opacity 160ms var(--ease-standard);
+  }
+
+  .mega-menu__preview {
+    position: relative;
+    display: block;
+    min-height: 100%;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .mega-menu__preview img {
+    height: 100%;
+    min-height: min(72vh, 48rem);
+    width: 100%;
+    object-fit: cover;
+    transition: transform 400ms var(--ease-standard);
+  }
+
+  .mega-menu__preview:hover img {
+    transform: scale(1.025);
+  }
+
+  .mega-menu__preview::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.5), transparent 46%);
+  }
+
+  .mega-menu__preview-copy {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 1;
+    color: var(--color-paper);
+  }
+
+  .mega-menu__preview-copy h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  @media (max-width: 767px) {
+    .mega-menu {
+      display: none;
+    }
+  }
 </style>
+
+<script>
+  document.querySelectorAll("[data-mega-trigger]").forEach((trigger) => {
+    let openTimer;
+    let closeTimer;
+
+    function openMenu() {
+      window.clearTimeout(closeTimer);
+      openTimer = window.setTimeout(() => {
+        trigger.classList.add("is-open");
+      }, 60);
+    }
+
+    function closeMenu() {
+      window.clearTimeout(openTimer);
+      closeTimer = window.setTimeout(() => {
+        trigger.classList.remove("is-open");
+      }, 260);
+    }
+
+    trigger.addEventListener("pointerenter", openMenu);
+    trigger.addEventListener("pointerleave", closeMenu);
+    trigger.addEventListener("focusin", openMenu);
+    trigger.addEventListener("focusout", (event) => {
+      if (!trigger.contains(event.relatedTarget)) closeMenu();
+    });
+  });
+</script>

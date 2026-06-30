@@ -1,0 +1,32 @@
+---
+export interface Props {
+  fitLabel: string;
+  productHandle: string;
+  productTitle: string;
+}
+
+const { fitLabel, productTitle } = Astro.props as Props;
+
+const isHoodie = productTitle.toLowerCase().includes("hoodie");
+
+const details = [
+  "Limited edition artwork",
+  isHoodie ? "Pullover hoodie" : "Graphic tee",
+  fitLabel,
+  "Ships from Los Angeles, CA",
+];
+---
+
+<section class="min-w-0 border-t border-line pt-7 font-sans text-ink">
+  <div class="grid min-w-0 gap-5 text-[13px] leading-relaxed text-muted">
+    <p class="text-ink">
+      {productTitle} is a limited-run Revenant Edge piece made for everyday wear.
+    </p>
+
+    <ul class="grid gap-1.5">
+      {details.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </div>
+</section>

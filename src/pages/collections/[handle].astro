@@ -21,18 +21,42 @@ if (!collection) {
 }
 
 const products = collection?.products.nodes.filter(Boolean) ?? [];
-const title = collection?.title ?? "Collection";
-const description = collection?.description ?? "";
-const heroImage = collection?.image ?? null;
-const heroSrc = heroImage ? `${heroImage.url}&width=2200` : "/hero-loop-poster.jpg";
-const heroAlt = heroImage?.altText ?? title;
-const productCount = products.length;
-const viewingText = productCount > 0
-  ? `Viewing 1 - ${productCount} out of ${productCount} products`
-  : "Viewing 0 out of 0 products";
-const recentlyViewed = products.slice(0, 4);
+const storefrontProducts = products.filter((product) => !/-white$/i.test(product.handle));
+const rawTitle = collection?.title ?? "Collection";
+const rawDescription = collection?.description ?? "";
+const copyOverrides: Record<string, { title: string; description: string }> = {
+  "shop-all": {
+    title: "Shop All",
+    description: "All designs by Jimmy Wong. Limited edition.",
+  },
+  "collection-1-children-of-the-sea": {
+    title: "Collection 1: Children of the Sea",
+    description: "Inspired by One Piece. Limited edition designs by Jimmy Wong",
+  },
+  "demon-slayer": {
+    title: "Collection 2: Set Your Heart Ablaze",
+    description: "Inspired by Demon Slayer. Designs by Jimmy Wong.",
+  },
+};
+const copy = copyOverrides[handle ?? ""];
+const title = copy?.title ?? rawTitle;
+const description = copy?.description ?? rawDescription;
+const productFamilies = Array.from(
+  storefrontProducts.reduce((families, product) => {
+    const key = product.title;
+    const existing = families.get(key) ?? [];
+    existing.push(product);
+    families.set(key, existing);
+    return families;
+  }, new Map<string, typeof storefrontProducts>())
+).map(([title, familyProducts]) => ({
+  title,
+  product: familyProducts.find((product) => /black/i.test(product.handle)) ?? familyProducts[0],
+  colorProducts: familyProducts,
+}));
+const displayCount = productFamilies.length;
 const collectionStory = description || `${title} brings Revenant Edge graphic staples into one place. Limited-run tees and hoodies sit alongside artwork-led pieces made for everyday wear, with new drops added as they go live.`;
-const analyticsProducts = JSON.stringify(products);
+const analyticsProducts = JSON.stringify(productFamilies.map((family) => family.product));
 const analyticsListName = JSON.stringify(title);
 
 setCache.short(Astro);
@@ -42,25 +66,12 @@ setCache.short(Astro);
   !collection ? (
     <NotFoundLayout title="Collection not found" message="Collection not found" />
   ) : (
-    <BaseLayout title={`${title} | Revenant Edge`} description={description || `Shop ${title} from Revenant Edge.`} solidHeader={false}>
-      <section class="relative min-h-[38vh] overflow-hidden bg-ink md:min-h-[52vh]">
-        <img
-          src={heroSrc}
-          alt={heroAlt}
-          width={heroImage?.width}
-          height={heroImage?.height}
-          class="absolute inset-0 h-full w-full object-cover"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <div class="absolute inset-0 bg-ink/20" aria-hidden="true"></div>
-      </section>
-
-      <section class="bg-paper px-5 py-6 md:px-8 md:py-7">
+    <BaseLayout title={`${title} | Revenant Edge`} description={description || `Shop ${title} from Revenant Edge.`} solidHeader={true}>
+      <section class="bg-paper px-5 py-8 md:px-8 md:py-10">
         <div class="max-w-[88rem]">
           <h1 class="font-sans text-[15px] font-semibold leading-tight text-ink">
             {title}
-            <sup class="ml-1 align-super font-sans text-[10px] font-normal text-muted">{productCount}</sup>
+            <sup class="ml-1 align-super font-sans text-[10px] font-normal text-muted">{displayCount}</sup>
           </h1>
           <p class="mt-5 max-w-[64rem] font-sans text-[13px] leading-relaxed text-ink">
             {collectionStory}
@@ -78,22 +89,15 @@ setCache.short(Astro);
               <span class="border border-ink"></span>
             </span>
           </div>
-          <button class="flex items-center gap-3 font-sans text-[12px] text-ink" type="button">
-            Filter
-            <span class="grid gap-[2px]" aria-hidden="true">
-              <span class="h-px w-4 bg-ink"></span>
-              <span class="ml-1 h-px w-3 bg-ink"></span>
-              <span class="ml-2 h-px w-2 bg-ink"></span>
-            </span>
-          </button>
+          <p class="font-sans text-[12px] text-muted">{displayCount} styles</p>
         </div>
       </section>
 
       <section class="bg-paper" aria-labelledby="collection-products-heading">
         <h2 id="collection-products-heading" class="sr-only">Products in {title} collection:</h2>
-        {productCount > 0 ? (
+        {displayCount > 0 ? (
           <div class="grid grid-cols-2 gap-x-px gap-y-10 px-px md:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => <ProductCard product={product} />)}
+            {productFamilies.map((family) => <ProductCard product={family.product} colorProducts={family.colorProducts} />)}
           </div>
         ) : (
           <div class="flex min-h-[32vh] flex-col items-center justify-center px-6 text-center">
@@ -103,16 +107,6 @@ setCache.short(Astro);
         )}
       </section>
 
-      <section class="bg-paper px-4 py-10 md:px-8">
-        <div class="mx-auto flex max-w-[24rem] flex-col items-center gap-5 text-center">
-          <button class="w-full border border-ink px-8 py-3 font-sans text-[12px] uppercase tracking-normal text-ink transition-colors hover:bg-ink hover:text-paper md:w-44" type="button">
-            Load More
-          </button>
-          <p class="font-sans text-[12px] text-muted">{viewingText}</p>
-          <div class="h-px w-full bg-ink"></div>
-        </div>
-      </section>
-
       <nav class="bg-paper px-4 pb-5 text-center md:px-8" aria-label="Breadcrumb">
         <ol class="inline-flex flex-wrap items-center gap-2 font-sans text-[12px] text-ink">
           <li><a class="text-ink underline underline-offset-4" href="/">Home</a></li>
@@ -120,20 +114,6 @@ setCache.short(Astro);
           <li>{title}</li>
         </ol>
       </nav>
-
-      <section class="bg-paper py-4">
-        <div class="text-center">
-          <h2 class="font-sans text-[12px] font-semibold uppercase tracking-normal text-ink">Recently Viewed Items</h2>
-          <div class="mt-6 font-sans text-[12px] text-ink" aria-hidden="true">
-            Next ›
-          </div>
-        </div>
-        <div class="mt-8 grid grid-cols-2 gap-x-px gap-y-10 px-px md:grid-cols-4">
-          {(recentlyViewed.length > 0 ? recentlyViewed : products).map((product) => (
-            <ProductCard product={product} />
-          ))}
-        </div>
-      </section>
 
       <section class="border-b border-line bg-paper px-6 py-14 text-center md:px-8">
         <div class="mx-auto max-w-[58rem]">

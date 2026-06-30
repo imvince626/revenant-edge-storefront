@@ -1,0 +1,122 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CmsDocument from "../../components/CmsDocument.astro";
+import { getPageByHandle } from "../../utils/shopify";
+import { setCache } from "../../utils/cache";
+
+const headers = Astro.request.headers;
+const ip = headers.get("x-vercel-forwarded-for") || Astro.clientAddress;
+const [teePage, hoodiePage] = await Promise.all([
+  getPageByHandle({ handle: "sizing", buyerIP: ip }).catch(() => null),
+  getPageByHandle({ handle: "hoodie-sizing", buyerIP: ip }).catch(() => null),
+]);
+const cmsBody = [teePage?.body, hoodiePage?.body].filter(Boolean).join("");
+const description =
+  teePage?.seo?.description ??
+  teePage?.bodySummary ??
+  "Revenant Edge size guide for tees and hoodies.";
+
+setCache.short(Astro);
+
+const sizeRows = [
+  ["S", "18.5", "27.5", "8.0"],
+  ["M", "20.0", "28.5", "8.5"],
+  ["L", "21.5", "29.5", "9.0"],
+  ["XL", "23.0", "30.5", "9.5"],
+  ["2XL", "24.5", "31.5", "10.0"],
+  ["3XL", "26.0", "32.5", "10.5"],
+];
+
+const hoodieRows = [
+  ["S", "22.0", "27.0", "24.0"],
+  ["M", "23.0", "28.0", "24.5"],
+  ["L", "24.0", "29.0", "25.0"],
+  ["XL", "25.0", "30.0", "25.5"],
+  ["2XL", "26.0", "31.0", "26.0"],
+  ["3XL", "27.0", "32.0", "26.5"],
+];
+---
+
+<BaseLayout
+  title="Size Guide | Revenant Edge"
+  description={description}
+  solidHeader={true}
+>
+  {cmsBody ? (
+    <CmsDocument
+      eyebrow="Size Guide"
+      title="Find Your Fit"
+      description={description}
+      body={cmsBody}
+    />
+  ) : (
+    <section class="bg-paper px-6 py-16 text-ink md:px-10 md:py-24">
+      <div class="mx-auto max-w-5xl">
+        <h1 class="font-display text-[clamp(2.5rem,6vw,5rem)] font-bold uppercase leading-[0.92] tracking-normal">
+          Find Your Fit
+        </h1>
+        <p class="mt-6 max-w-2xl font-sans text-sm leading-relaxed text-muted">
+          Measurements are approximate and listed in inches. Compare against a garment you already own for the best fit.
+        </p>
+
+        <div class="mt-12 grid gap-12">
+          <section>
+            <div class="mb-4 flex items-end justify-between gap-6">
+              <h2 class="font-sans text-sm font-semibold text-ink">Graphic Tees</h2>
+              <p class="font-sans text-xs text-muted">Oversized fit</p>
+            </div>
+            <div class="overflow-x-auto border-t border-line">
+              <table class="w-full min-w-[24rem] border-collapse text-left font-sans text-sm sm:min-w-[34rem]">
+                <thead>
+                  <tr class="border-b border-line text-ink">
+                    <th class="py-4 font-semibold">Size</th>
+                    <th class="py-4 font-semibold">Chest</th>
+                    <th class="py-4 font-semibold">Length</th>
+                    <th class="py-4 font-semibold">Sleeve</th>
+                  </tr>
+                </thead>
+                <tbody class="text-muted">
+                  {sizeRows.map((row) => (
+                    <tr class="border-b border-line">
+                      {row.map((cell, index) => (
+                        <td class:list={["py-4", index === 0 && "font-semibold text-ink"]}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <div class="mb-4 flex items-end justify-between gap-6">
+              <h2 class="font-sans text-sm font-semibold text-ink">Hoodies</h2>
+              <p class="font-sans text-xs text-muted">Relaxed fit</p>
+            </div>
+            <div class="overflow-x-auto border-t border-line">
+              <table class="w-full min-w-[24rem] border-collapse text-left font-sans text-sm sm:min-w-[34rem]">
+                <thead>
+                  <tr class="border-b border-line text-ink">
+                    <th class="py-4 font-semibold">Size</th>
+                    <th class="py-4 font-semibold">Chest</th>
+                    <th class="py-4 font-semibold">Length</th>
+                    <th class="py-4 font-semibold">Sleeve</th>
+                  </tr>
+                </thead>
+                <tbody class="text-muted">
+                  {hoodieRows.map((row) => (
+                    <tr class="border-b border-line">
+                      {row.map((cell, index) => (
+                        <td class:list={["py-4", index === 0 && "font-semibold text-ink"]}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

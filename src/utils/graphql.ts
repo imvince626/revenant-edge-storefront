@@ -82,6 +82,42 @@ fragment productFragment on Product {
 }
 `;
 
+const PAGE_FRAGMENT = `#graphql
+fragment pageFragment on Page {
+  id
+  title
+  handle
+  body
+  bodySummary
+  seo {
+    title
+    description
+  }
+}
+`;
+
+const ARTICLE_FRAGMENT = `#graphql
+fragment articleFragment on Article {
+  id
+  title
+  handle
+  excerpt
+  excerptHtml
+  contentHtml
+  publishedAt
+  image {
+    url
+    width
+    height
+    altText
+  }
+  seo {
+    title
+    description
+  }
+}
+`;
+
 export const ProductsQuery = `#graphql
 query ($first: Int!) {
     products(first: $first) {
@@ -136,6 +172,79 @@ export const CollectionByHandleQuery = `#graphql
   ${PRODUCT_FRAGMENT}
 `;
 
+export const PageByHandleQuery = `#graphql
+  query ($handle: String!) {
+    page(handle: $handle) {
+      ...pageFragment
+    }
+  }
+  ${PAGE_FRAGMENT}
+`;
+
+export const ShopPoliciesQuery = `#graphql
+  query {
+    shop {
+      privacyPolicy {
+        title
+        handle
+        body
+      }
+      refundPolicy {
+        title
+        handle
+        body
+      }
+      shippingPolicy {
+        title
+        handle
+        body
+      }
+      termsOfService {
+        title
+        handle
+        body
+      }
+      subscriptionPolicy {
+        title
+        handle
+        body
+      }
+    }
+  }
+`;
+
+export const BlogByHandleQuery = `#graphql
+  query ($handle: String!, $first: Int!) {
+    blog(handle: $handle) {
+      title
+      handle
+      seo {
+        title
+        description
+      }
+      articles(first: $first, reverse: true) {
+        nodes {
+          ...articleFragment
+        }
+      }
+    }
+  }
+  ${ARTICLE_FRAGMENT}
+`;
+
+export const ArticleByHandleQuery = `#graphql
+  query ($blogHandle: String!, $articleHandle: String!) {
+    blog(handle: $blogHandle) {
+      title
+      handle
+      articleByHandle(handle: $articleHandle) {
+        ...articleFragment
+      }
+    }
+  }
+  ${ARTICLE_FRAGMENT}
+`;
+
 export const GetCartQuery = `#graphql
   query ($id: ID!) {
     cart(id: $id) {
@@ -188,4 +297,21 @@ export const RemoveCartLinesMutation = `#graphql
     }
   }
   ${CART_FRAGMENT}
+`;
+
+export const CustomerCreateMutation = `#graphql
+  mutation ($input: CustomerCreateInput!) {
+    customerCreate(input: $input) {
+      customer {
+        id
+        email
+        acceptsMarketing
+      }
+      customerUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
 `;

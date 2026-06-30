@@ -1,0 +1,64 @@
+---
+import type { z } from "zod";
+import type { ImageResult } from "../utils/schemas";
+
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  body?: string | null;
+  image?: z.infer<typeof ImageResult>;
+  publishedAt?: string | null;
+}
+
+const {
+  title,
+  description = "",
+  body = "",
+  image = null,
+  publishedAt = null,
+} = Astro.props as Props;
+
+const displayDate = publishedAt
+  ? new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(new Date(publishedAt))
+  : "";
+---
+
+<section class="bg-paper px-6 py-16 text-ink md:px-10 md:py-24">
+  <article class="mx-auto max-w-4xl">
+    <h1 class="font-display text-[clamp(2.5rem,6vw,5rem)] font-bold uppercase leading-[0.92] tracking-normal">
+      {title}
+    </h1>
+
+    {(description || displayDate) && (
+      <div class="mt-6 grid gap-2 font-sans text-sm leading-relaxed text-muted md:text-base">
+        {displayDate && <p>{displayDate}</p>}
+        {description && <p>{description}</p>}
+      </div>
+    )}
+
+    {image?.url && (
+      <img
+        src={`${image.url}${image.url.includes("?") ? "&" : "?"}width=1400`}
+        alt={image.altText ?? title}
+        width={image.width}
+        height={image.height}
+        class="mt-10 w-full bg-surface object-cover"
+        loading="eager"
+      />
+    )}
+
+    {body ? (
+      <div class="cms-content mt-10" set:html={body} />
+    ) : (
+      <p class="mt-10 font-sans text-sm leading-relaxed text-muted">
+        Content is being updated in Shopify.
+      </p>
+    )}
+  </article>
+</section>

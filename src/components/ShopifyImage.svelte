@@ -25,20 +25,15 @@
   function imageFilter(size: { width: number; height?: number }) {
     const { width, height = "" } = size;
 
+    if (image?.url.startsWith("/")) return image.url;
     return image && `${image.url}&width=${width}&height=${height}`;
   }
-</script>
 
-{#if image}
-  <img
-    src={image.url}
-    alt={image.altText || "Default alt text"}
-    class={classList}
-    width={image.width}
-    height={image.height}
-    {loading}
-    {sizes}
-    srcset={srcSetValues
+  function imageSrcset() {
+    if (!image) return "";
+    if (image.url.startsWith("/")) return image.url;
+
+    return srcSetValues
       .filter((value) => image && value < image.width)
       .map((value) => {
         if (image && image.width >= value) {
@@ -48,7 +43,20 @@
         }
       })
       .join(", ")
-      .concat(`, ${image.url} ${image.width}w`)}
+      .concat(`, ${image.url} ${image.width}w`);
+  }
+</script>
+
+{#if image}
+  <img
+    src={image.url}
+    alt={image.altText || "Revenant Edge product image"}
+    class={classList}
+    width={image.width}
+    height={image.height}
+    {loading}
+    {sizes}
+    srcset={imageSrcset()}
   />
 {:else}
   <!-- Shopify product image placeholder -->

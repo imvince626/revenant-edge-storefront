@@ -1,26 +1,25 @@
 <script lang="ts">
   import { fade, scale } from "svelte/transition";
-  import { onMount } from "svelte";
 
-  // ── Props ──────────────────────────────────────────────────────────────────
-  let { discount = "15%", delayMs = 1600 }: { discount?: string; delayMs?: number } = $props();
+  let { delayMs = 1600 }: { discount?: string; delayMs?: number } = $props();
 
-  // ── State ──────────────────────────────────────────────────────────────────
   const LS_KEY = "re_newsletter_seen";
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  let visible   = $state(false);
-  let email     = $state("");
-  let error     = $state("");
-  let submitted = $state(false); // brief success flash before unmount
+  let visible = $state(false);
+  let email = $state("");
+  let phone = $state("");
+  let error = $state("");
+  let isSubmitting = $state(false);
+  let step = $state<"email" | "confirm">("email");
 
-  // ── Show-once guard + delayed trigger ─────────────────────────────────────
   $effect(() => {
     if (typeof window === "undefined") return;
-    if (localStorage.getItem(LS_KEY) === "1") return;
+    const forcePreview = new URLSearchParams(window.location.search).get("preview") === "newsletter";
+    if (!forcePreview && localStorage.getItem(LS_KEY) === "1") return;
 
     const timer = setTimeout(() => {
       visible = true;
-      // Move focus into the dialog after the transition settles
       setTimeout(() => {
         document.getElementById("nl-email-input")?.focus();
       }, 320);
@@ -29,30 +28,26 @@
     return () => clearTimeout(timer);
   });
 
-  // ── Keyboard handler (Escape) ─────────────────────────────────────────────
   $effect(() => {
     if (!visible) return;
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") dismiss();
     }
+
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
-  // ── Body scroll lock ──────────────────────────────────────────────────────
   $effect(() => {
     if (typeof document === "undefined") return;
-    if (visible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = visible ? "hidden" : "";
+
     return () => {
       document.body.style.overflow = "";
     };
   });
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   function markSeen() {
     if (typeof window !== "undefined") {
       localStorage.setItem(LS_KEY, "1");
@@ -65,13 +60,10 @@
   }
 
   function onBackdropClick(e: MouseEvent) {
-    // Only close if the click landed on the backdrop itself, not the card
     if (e.target === e.currentTarget) dismiss();
   }
 
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  function handleSubmit(e: SubmitEvent) {
+  async function handleEmailSubmit(e: SubmitEvent) {
     e.preventDefault();
     error = "";
 
@@ -80,134 +72,229 @@
       return;
     }
 
-    // TODO: POST email to newsletter endpoint (Klaviyo/Shopify customer) — stub for now
-    // Example:
-    //   await fetch("/api/newsletter", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ email: email.trim() }),
-    //   });
-    const capturedEmail = email.trim(); // kept in local scope until endpoint is wired
-    void capturedEmail;
+    isSubmitting = true;
 
-    markSeen();
-    submitted = true;
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), phone: phone.trim() || undefined }),
+      });
+      const result = await response.json();
 
-    // Show success flash, then unmount
-    setTimeout(() => {
-      visible = false;
-    }, 1200);
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || "Signup failed");
+      }
+
+      markSeen();
+      step = "confirm";
+    } catch (_) {
+      error = "We could not sign you up. Email hello@revenantedge.com.";
+    } finally {
+      isSubmitting = false;
+    }
   }
 </script>
 
 {#if visible}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-  <!-- Backdrop -->
   <div
     role="presentation"
-    class="fixed inset-0 z-[60] flex items-center justify-center px-4"
-    style="background: color-mix(in srgb, var(--color-ink) 70%, transparent);"
-    in:fade={{ duration: 280 }}
-    out:fade={{ duration: 200 }}
+    class="fixed inset-0 z-[60] flex items-center justify-center px-5 py-6 sm:px-6"
+    style="background: color-mix(in srgb, var(--color-ink) 72%, transparent);"
+    in:fade={{ duration: 240 }}
+    out:fade={{ duration: 180 }}
     onclick={onBackdropClick}
     onkeydown={() => {}}
   >
-    <!-- Card -->
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="nl-modal-headline"
-      class="relative w-full max-w-[28rem] bg-paper border border-line p-8 flex flex-col gap-6 shadow-lg"
-      in:scale={{ duration: 280, start: 0.96, opacity: 0 }}
-      out:scale={{ duration: 200, start: 0.96, opacity: 0 }}
+      class="newsletter-modal relative grid w-full max-w-[58rem] overflow-hidden bg-ink text-paper shadow-2xl md:grid-cols-[0.9fr_1fr]"
+      in:scale={{ duration: 260, start: 0.97, opacity: 0 }}
+      out:scale={{ duration: 180, start: 0.97, opacity: 0 }}
     >
-      <!-- Close (X) button -->
-      <button
-        type="button"
-        aria-label="Close"
-        onclick={dismiss}
-        class="absolute top-4 right-4 p-1 text-muted hover:text-ink transition-colors"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path
-            d="M3 3L17 17M17 3L3 17"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
+      <div class="relative hidden min-h-[28rem] bg-surface md:block">
+        <img
+          src="/hero-loop-poster.jpg"
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+        />
+      </div>
 
-      <!-- Brand eyebrow -->
-      <p class="nav-label" style="color: var(--color-ember);">Revenant Edge</p>
-
-      {#if submitted}
-        <!-- ── Success state ── -->
-        <div class="flex flex-col gap-2 py-4">
-          <p
-            class="font-display font-bold uppercase text-ink"
-            style="font-size: clamp(1.25rem, 3vw, 1.75rem); letter-spacing: -0.03em; line-height: 1.07;"
-          >
-            You are on the list.
-          </p>
-          <p class="font-sans text-sm" style="color: var(--color-muted);">
-            Watch for the next drop.
-          </p>
-        </div>
-      {:else}
-        <!-- ── Capture form ── -->
-        <div class="flex flex-col gap-1">
-          <h2
-            id="nl-modal-headline"
-            class="font-display font-bold uppercase text-ink"
-            style="font-size: clamp(1.75rem, 4vw, 2.25rem); letter-spacing: -0.03em; line-height: 1.07;"
-          >
-            Unlock {discount} Off
-          </h2>
-          <p class="font-sans text-sm" style="color: var(--color-muted);">
-            First order. Join the drop list before the next limited run sells out.
-          </p>
-        </div>
-
-        <form onsubmit={handleSubmit} novalidate class="flex flex-col gap-3">
-          <div class="flex flex-col gap-1">
-            <label for="nl-email-input" class="sr-only">Email address</label>
-            <input
-              id="nl-email-input"
-              type="email"
-              required
-              autocomplete="email"
-              placeholder="your@email.com"
-              bind:value={email}
-              class="w-full border border-ink bg-paper font-sans text-sm text-ink px-4 py-3 placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-ink focus:ring-offset-2"
-            />
-            {#if error}
-              <p class="font-sans text-xs" style="color: var(--color-ember);">{error}</p>
-            {/if}
-          </div>
-
-          <button type="submit" class="button w-full">
-            Continue
-          </button>
-        </form>
-
-        <!-- Dismiss link -->
+      <div class="newsletter-panel relative flex min-h-[28rem] flex-col justify-center overflow-y-auto px-6 py-8 sm:px-9 md:py-8 lg:px-10">
         <button
           type="button"
+          aria-label="Close"
           onclick={dismiss}
-          class="font-sans text-xs underline underline-offset-4 self-center"
-          style="color: var(--color-muted);"
+          class="absolute right-4 top-4 grid h-9 w-9 place-items-center text-paper transition-opacity hover:opacity-70 md:right-5 md:top-5"
         >
-          No Thanks
+          <span class="newsletter-close" aria-hidden="true"></span>
         </button>
-      {/if}
+
+        <div class="mx-auto flex w-full max-w-[26rem] flex-col items-center text-center">
+          <img src="/logo-mark-white.png" alt="Revenant Edge" class="mb-5 h-auto w-[6.6rem]" loading="eager" />
+
+          {#if step === "confirm"}
+            <div class="mb-14 grid h-[8.5rem] w-[5rem] place-items-center rounded-[1.1rem] border-[0.35rem] border-paper">
+              <span class="block h-5 w-10 rounded-sm border-[0.3rem] border-paper"></span>
+            </div>
+            <h2
+              id="nl-modal-headline"
+              class="font-display text-[clamp(2.2rem,4.2vw,3.6rem)] font-black uppercase leading-[0.92] tracking-normal text-paper"
+            >
+              You're On The List
+            </h2>
+            <p class="mt-4 font-display text-[clamp(0.95rem,1.25vw,1.15rem)] font-black leading-tight text-paper">
+              Watch your inbox for drop alerts and early access.
+            </p>
+          {:else}
+            <h2
+              id="nl-modal-headline"
+              class="font-display text-[clamp(2.65rem,4.5vw,4rem)] font-black uppercase leading-[0.9] tracking-normal text-paper"
+            >
+              <span class="block whitespace-nowrap">Get Drop</span>
+              <span class="block">Access</span>
+            </h2>
+            <p class="mt-4 max-w-[22rem] font-display text-[clamp(0.95rem,1.2vw,1.1rem)] font-black leading-tight text-paper">
+              Join for release alerts, early access, and restock notes.
+            </p>
+
+            {#if step === "email"}
+              <form onsubmit={handleEmailSubmit} novalidate class="mt-6 flex w-full flex-col">
+                <label for="nl-email-input" class="sr-only">Email address</label>
+                <div class="relative">
+                  <input
+                    id="nl-email-input"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="Email Address"
+                    bind:value={email}
+                    class="newsletter-input pr-16"
+                  />
+                  <span class="newsletter-chat" aria-hidden="true">•••</span>
+                </div>
+                <label for="nl-phone-input" class="sr-only">Mobile number optional</label>
+                <input
+                  id="nl-phone-input"
+                  type="tel"
+                  autocomplete="tel"
+                  placeholder="Mobile Number (Optional)"
+                  bind:value={phone}
+                  class="newsletter-input mt-3"
+                />
+                {#if error}
+                  <p class="mt-3 text-left font-sans text-sm font-semibold text-paper">{error}</p>
+                {/if}
+                <button type="submit" class="newsletter-submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Signing Up" : "Sign Up"}
+                </button>
+              </form>
+            {/if}
+          {/if}
+        </div>
+      </div>
     </div>
   </div>
 {/if}
+
+<style>
+  .newsletter-modal {
+    max-height: min(80vh, 40rem);
+  }
+
+  .newsletter-close,
+  .newsletter-close::after {
+    display: block;
+    height: 0.13rem;
+    width: 1.7rem;
+    background: var(--color-paper);
+    content: "";
+  }
+
+  .newsletter-close {
+    transform: rotate(45deg);
+  }
+
+  .newsletter-close::after {
+    transform: rotate(90deg);
+  }
+
+  .newsletter-input {
+    min-height: 3.55rem;
+    width: 100%;
+    border: 0.12rem solid var(--color-ember);
+    background: var(--color-paper);
+    padding: 0 1.25rem;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 1.35vw, 1.12rem);
+    font-weight: 900;
+    line-height: 1;
+    outline: none;
+  }
+
+  .newsletter-input::placeholder {
+    color: color-mix(in srgb, var(--color-ink) 55%, var(--color-paper));
+    opacity: 1;
+  }
+
+  .newsletter-input:focus {
+    border-color: var(--color-paper);
+  }
+
+  .newsletter-chat {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    display: grid;
+    height: 1.45rem;
+    width: 1.45rem;
+    place-items: center;
+    transform: translateY(-50%);
+    border-radius: 0.35rem;
+    background: var(--color-ember);
+    color: var(--color-paper);
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .newsletter-submit {
+    min-height: 3.85rem;
+    width: 100%;
+    background: var(--color-ember);
+    color: var(--color-paper);
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 2vw, 1.9rem);
+    font-weight: 900;
+    line-height: 0.95;
+    text-align: center;
+    text-transform: uppercase;
+    transition: background 160ms ease;
+  }
+
+  .newsletter-submit:hover {
+    background: var(--color-ember-700);
+  }
+
+  .newsletter-submit:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
+
+  @media (max-width: 767px) {
+    .newsletter-modal {
+      max-height: min(88vh, 34rem);
+    }
+
+    .newsletter-panel {
+      max-height: min(88vh, 34rem);
+      min-height: auto;
+    }
+  }
+</style>

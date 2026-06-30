@@ -1,5 +1,6 @@
 <script lang="ts">
   import { preventDefault } from 'svelte/legacy';
+  import { onMount } from "svelte";
   import type { z } from "zod";
   import type { VariantResult, ProductResult } from "../utils/schemas";
 
@@ -15,6 +16,9 @@
   }
 
   let { variantId: initialVariantId, variantQuantityAvailable: initialQty, variantAvailableForSale: initialAvailable, variants = [], product = null }: Props = $props();
+  let formEl: HTMLFormElement;
+  let inlineSubmitEl: HTMLButtonElement;
+  let stickyVisible = $state(false);
 
   function getInitialVariantId() {
     return initialVariantId;
@@ -61,19 +65,62 @@
 
     addCartItem(item);
   }
+
+  function submitFromSticky() {
+    if (!formEl) return;
+    if (typeof formEl.requestSubmit === "function") {
+      formEl.requestSubmit();
+      return;
+    }
+    formEl.dispatchEvent(new SubmitEvent("submit", { cancelable: true, bubbles: true }));
+  }
+
+  onMount(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    let observer: IntersectionObserver | null = null;
+
+    function updateStickyState() {
+      stickyVisible = media.matches;
+    }
+
+    function observeInlineButton() {
+      observer?.disconnect();
+      observer = null;
+
+      if (!inlineSubmitEl) {
+        updateStickyState();
+        return;
+      }
+
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          stickyVisible = media.matches && !entry.isIntersecting;
+        },
+        { threshold: 0.35 }
+      );
+      observer.observe(inlineSubmitEl);
+    }
+
+    observeInlineButton();
+    media.addEventListener("change", observeInlineButton);
+
+    return () => {
+      observer?.disconnect();
+      media.removeEventListener("change", observeInlineButton);
+    };
+  });
 </script>
 
 <!-- Size / variant selector (only rendered when variants are provided) -->
 {#if variants.length > 1}
   <div class="mb-4">
-    <div class="mb-3 flex items-center justify-between">
+    <div class="mb-5 flex items-center justify-between">
       <div class="flex items-center gap-6">
         <p class="font-sans text-sm font-semibold text-ink">Size</p>
-        <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Not In Stock?</a>
       </div>
       <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Chart</a>
     </div>
-    <div class="grid grid-cols-5 gap-1">
+    <div class="grid grid-cols-4 gap-1 md:grid-cols-5">
       {#each variants as v}
         <button
           type="button"
@@ -82,12 +129,13 @@
           aria-pressed={selectedVariantId === v.id}
           class={[
             "font-sans text-xs font-semibold",
-            "flex h-12 min-w-[3rem] items-center justify-center px-3",
-            "border transition-colors",
-            "disabled:cursor-not-allowed disabled:opacity-35",
+            "relative flex h-10 min-w-[3rem] items-center justify-center px-3",
+            "transition-colors",
+            "disabled:cursor-not-allowed disabled:text-faint",
             selectedVariantId === v.id
-              ? "border-ink bg-ink text-paper"
-              : "border-line bg-paper text-ink hover:border-ink",
+              ? "bg-paper text-ink ring-1 ring-inset ring-ink"
+              : "bg-surface text-ink hover:ring-1 hover:ring-inset hover:ring-ink",
+            !v.availableForSale ? "after:absolute after:left-0 after:top-0 after:h-px after:w-[145%] after:origin-top-left after:rotate-[155deg] after:bg-line" : "",
           ].join(" ")}
         >
           {v.title}
@@ -97,18 +145,20 @@
   </div>
 {/if}
 
-<form onsubmit={preventDefault((e) => addToCart(e))}>
+<form bind:this={formEl} onsubmit={preventDefault((e) => addToCart(e))}>
   <input type="hidden" name="id" value={activeVariantId} />
   <input type="hidden" name="quantity" value="1" />
 
   <button
+    bind:this={inlineSubmitEl}
     type="submit"
     class={[
       "font-sans text-sm font-semibold uppercase",
       "flex w-full items-center justify-center gap-3",
-      "bg-ink text-paper px-8 py-4",
-      "transition-all duration-[280ms]",
-      "hover:bg-ember-700",
+      "h-[52px] bg-ink text-paper px-8",
+      "transition-[transform,box-shadow] duration-[180ms]",
+      "hover:-translate-y-px hover:shadow-[inset_0_0_0_1px_var(--color-ink),0_10px_22px_rgba(10,10,10,0.18)]",
+      "active:translate-y-0 active:shadow-none",
       "focus:ring-2 focus:ring-ink focus:ring-offset-2 focus:outline-none",
       "disabled:cursor-not-allowed disabled:opacity-40",
     ].join(" ")}
@@ -147,3 +197,55 @@
     <p class="mt-2 text-center text-xs text-muted">All units left are in your cart</p>
   {/if}
 </form>
+
+<div
+  class={[
+    "fixed inset-x-0 bottom-0 z-[55] md:hidden",
+    "transition-transform duration-[220ms]",
+    stickyVisible ? "translate-y-0" : "pointer-events-none translate-y-full",
+  ].join(" ")}
+  aria-hidden={!stickyVisible}
+>
+  <button
+    type="button"
+    onclick={submitFromSticky}
+    class={[
+      "font-sans text-sm font-semibold uppercase",
+      "flex h-14 w-full items-center justify-center gap-3",
+      "bg-ink px-8 text-paper",
+      "transition-[transform,box-shadow] duration-[180ms]",
+      "active:translate-y-0 active:shadow-none",
+      "disabled:cursor-not-allowed disabled:opacity-40",
+    ].join(" ")}
+    disabled={$isCartUpdating || noQuantityLeft || !activeAvailableForSale}
+    tabindex={stickyVisible ? 0 : -1}
+  >
+    {#if $isCartUpdating}
+      <svg
+        class="animate-spin h-4 w-4 text-paper"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
+      </svg>
+    {/if}
+    {#if activeAvailableForSale}
+      Add to Cart
+    {:else}
+      Sold out
+    {/if}
+  </button>
+</div>
