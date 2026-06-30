@@ -1,5 +1,5 @@
 ---
-import { isCollection2ProductHandle } from "../utils/collections";
+import { productLifestyleImages } from "../utils/product-media";
 
 export interface Props {
   productHandle: string;
@@ -7,74 +7,154 @@ export interface Props {
 
 const { productHandle } = Astro.props as Props;
 
-const isCollection2 = isCollection2ProductHandle(productHandle);
-const media = isCollection2
-  ? {
-      src: "/videos/demon-slayer-home.mp4",
-      poster: "/hero-loop-poster.jpg",
-    }
-  : {
-      src: "/hero-loop.mp4",
-      poster: "/hero-loop-poster.jpg",
-    };
+const isHoodie = productHandle.includes("hoodie");
+const garment = isHoodie ? "hoodie" : "t-shirt";
+const lifestyleImages = productLifestyleImages(productHandle);
+const fitMedia = lifestyleImages[0] ?? null;
+const printMedia = lifestyleImages[1] ?? lifestyleImages[0] ?? null;
+const fallbackVideo = {
+  src: productHandle.includes("king-of-hell") || productHandle.includes("drums-of-liberation")
+    ? "/videos/demon-slayer-home.mp4"
+    : "/hero-loop.mp4",
+  poster: "/hero-loop-poster.jpg",
+};
 
-type Feature = [string, string | string[]];
+function imageUrlWithWidth(url: string, width: number) {
+  if (url.startsWith("/")) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}width=${width}`;
+}
 
-const constructionDetails = [
-  "Premium heavyweight Revenant Edge blank t-shirt 100% cotton",
-  "Heavy screenprint on back and front",
-  "Made in USA",
+const specs = [
+  ["100% Cotton", "Premium heavyweight Revenant Edge blank"],
+  ["Heavy Print", "Screenprinted graphics on the front and back"],
+  ["Made in USA", "Made in the United States and fulfilled from Los Angeles"],
+  ["Oversized Fit", "Relaxed body with a structured streetwear drape"],
 ];
 
-const features = isCollection2
-  ? [
-      ["Limited Edition Artwork", "Designed by Jimmy Wong"],
-      ["Collection 2", "Inspired by Demon Slayer"],
-      ["Everyday Oversized Fit", constructionDetails],
-    ]
-  : [
-      ["Limited Edition Artwork", "Designed by Jimmy Wong"],
-      ["Collection 1 Energy", "Inspired by One Piece"],
-      ["Everyday Oversized Fit", constructionDetails],
-    ] satisfies Feature[];
+const proofPoints = [
+  {
+    title: "Print Built To Carry The Artwork",
+    body:
+      "Heavy ink coverage keeps the graphic sharp, saturated, and visible from a distance. Each piece is made for the art to be the first thing people notice.",
+  },
+  {
+    title: "A Blank With Real Weight",
+    body:
+      `The ${garment} starts with a heavyweight 100% cotton base, giving it structure without making it stiff. It is meant to feel substantial the first time you put it on.`,
+  },
+  {
+    title: "Universal Oversized Fit",
+    body:
+      "Designed with a relaxed body, dropped shoulder, and clean length so it can be worn loose without feeling sloppy.",
+  },
+];
 ---
 
-<section class="grid border-t border-line bg-paper text-ink lg:grid-cols-2">
-  <div class="relative flex min-h-[32rem] items-center justify-center overflow-hidden px-8 py-16 md:min-h-[38rem]">
-    <span
-      class="pointer-events-none absolute -left-[7vw] top-1/2 -translate-y-1/2 font-display text-[28rem] font-bold leading-none text-surface md:text-[38rem]"
-      aria-hidden="true"
-    >
-      R
-    </span>
-    <div class="relative z-10 grid max-w-md gap-14 text-center">
-      {features.map(([title, body]) => (
-        <div>
-          <h2 class="font-sans text-xl font-semibold leading-tight text-ink">{title}</h2>
-          {Array.isArray(body) ? (
-            <ul class="mt-5 grid gap-2 font-sans text-sm leading-relaxed text-ink">
-              {body.map((item) => (
-                <li>- {item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p class="mt-5 font-sans text-sm leading-relaxed text-ink">{body}</p>
-          )}
+<section id="product-quality" class="border-t border-line bg-paper text-ink">
+  <div class="grid lg:grid-cols-[0.92fr_1.08fr]">
+    <div class="flex min-h-[30rem] items-center px-6 py-14 md:px-12 md:py-18 lg:min-h-[42rem] lg:px-16">
+      <div class="max-w-xl">
+        <h2 class="font-sans text-4xl font-semibold leading-[0.95] text-ink md:text-6xl">
+          Made for the blank, the print, and the fit.
+        </h2>
+        <p class="mt-7 font-sans text-base font-semibold leading-relaxed text-muted md:text-lg">
+          Every Revenant Edge piece is built around the same essentials: heavyweight cotton, heavy screenprinted graphics, and an oversized fit that holds shape.
+        </p>
+
+        <div class="mt-10 grid grid-cols-2 border-y border-line md:grid-cols-4">
+          {specs.map(([title, body]) => (
+            <div class="border-line py-5 pr-4 md:border-r md:pr-5 md:last:border-r-0">
+              <h3 class="font-sans text-sm font-semibold uppercase leading-tight text-ink">
+                {title}
+              </h3>
+              <p class="mt-3 font-sans text-xs font-semibold leading-relaxed text-muted">
+                {body}
+              </p>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+    </div>
+
+    <div class="min-h-[30rem] overflow-hidden bg-ink lg:min-h-[42rem]">
+      {fitMedia ? (
+        <img
+          src={imageUrlWithWidth(fitMedia.url, 1600)}
+          alt={fitMedia.altText}
+          width={fitMedia.width}
+          height={fitMedia.height}
+          loading="lazy"
+          class="h-full min-h-[30rem] w-full object-cover lg:min-h-[42rem]"
+          sizes="(min-width: 1024px) 54vw, 100vw"
+        />
+      ) : (
+        <video
+          class="h-full min-h-[30rem] w-full object-cover lg:min-h-[42rem]"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster={fallbackVideo.poster}
+        >
+          <source src={fallbackVideo.src} type="video/mp4" />
+        </video>
+      )}
     </div>
   </div>
 
-  <div class="min-h-[32rem] overflow-hidden bg-surface md:min-h-[38rem]">
-    <video
-      class="h-full min-h-[32rem] w-full object-cover md:min-h-[38rem]"
-      autoplay
-      muted
-      loop
-      playsinline
-      poster={media.poster}
-    >
-      <source src={media.src} type="video/mp4" />
-    </video>
+  <div class="grid border-t border-line lg:grid-cols-3">
+    {proofPoints.map((point) => (
+      <div class="border-b border-line px-6 py-10 md:px-12 lg:border-b-0 lg:border-r lg:px-10 lg:last:border-r-0">
+        <h3 class="font-sans text-2xl font-semibold leading-tight text-ink md:text-3xl">
+          {point.title}
+        </h3>
+        <p class="mt-5 font-sans text-sm font-semibold leading-relaxed text-muted md:text-base">
+          {point.body}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <div class="grid border-t border-line lg:grid-cols-2">
+    <div class="min-h-[28rem] overflow-hidden bg-surface">
+      {printMedia ? (
+        <img
+          src={imageUrlWithWidth(printMedia.url, 1600)}
+          alt={printMedia.altText}
+          width={printMedia.width}
+          height={printMedia.height}
+          loading="lazy"
+          class="h-full min-h-[28rem] w-full object-cover"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      ) : (
+        <video
+          class="h-full min-h-[28rem] w-full object-cover"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster={fallbackVideo.poster}
+        >
+          <source src={fallbackVideo.src} type="video/mp4" />
+        </video>
+      )}
+    </div>
+
+    <div class="flex min-h-[28rem] items-center px-6 py-12 md:px-12 lg:px-16">
+      <div class="max-w-lg">
+        <h3 class="font-sans text-3xl font-semibold leading-tight text-ink md:text-5xl">
+          Quality you can see up close.
+        </h3>
+        <div class="mt-8 grid gap-5 font-sans text-sm font-semibold leading-relaxed text-muted md:text-base">
+          <p>
+            The artwork is not treated like decoration. It is the product. Large-format front and back prints are made to carry color, line weight, and detail across the whole piece.
+          </p>
+          <p>
+            Up close, the graphic should feel tactile: ink texture, clean edges, and a print that sits with weight on the cotton.
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
