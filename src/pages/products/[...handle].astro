@@ -12,7 +12,6 @@ import ProductInformations from "../../components/ProductInformations.astro";
 import ProductAccordions from "../../components/ProductAccordions.astro";
 import ProductFeatureSplit from "../../components/ProductFeatureSplit.astro";
 import ProductRecommendations from "../../components/ProductRecommendations.astro";
-import ProductReviews from "../../components/ProductReviews.astro";
 
 const { handle } = Astro.params;
 if (handle && /-white$/i.test(handle)) {
@@ -232,8 +231,8 @@ const recommendationCollection = isCollection2Product
               <div class="mt-7 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-2 text-sm text-ink" aria-label="Product rating">
                   <span class="tracking-[0.08em]">★★★★★</span>
-                  <a href="#reviews" class="font-sans text-xs text-muted underline underline-offset-2">
-                    2 reviews
+                  <a href="#trustpilot-reviews" class="font-sans text-xs text-muted underline underline-offset-2">
+                    2 Trustpilot reviews
                   </a>
                 </div>
               </div>
@@ -359,7 +358,6 @@ const recommendationCollection = isCollection2Product
         collectionGroup={recommendationCollection.group}
         ctaLabel={recommendationCollection.ctaLabel}
       />
-      <ProductReviews productTitle={product.title} />
     </BaseLayout>
   )
 }
