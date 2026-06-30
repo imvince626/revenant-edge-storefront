@@ -100,7 +100,7 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
     class="absolute bottom-5 left-4 z-10 bg-paper px-3 py-2 font-sans text-sm font-semibold leading-none text-muted md:bottom-8 md:left-8 md:px-4 md:py-3 md:text-lg lg:bottom-auto lg:left-4 lg:top-4 lg:px-3 lg:py-2 lg:text-xs lg:text-ink"
     data-product-gallery-count
   >
-    1 / {galleryImages.length}
+    1 / {galleryPayload.length || 1}
   </div>
   <button
     class="absolute bottom-5 right-4 z-10 grid h-8 w-8 place-items-center text-ink transition-opacity hover:opacity-60 md:bottom-8 md:right-8"
@@ -113,7 +113,7 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
   </button>
 
   <button
-    class="absolute left-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink transition-opacity hover:opacity-60 disabled:opacity-20 md:block"
+    class="absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center bg-paper/85 font-sans text-3xl leading-none text-ink transition-opacity hover:opacity-60 disabled:hidden md:left-8"
     type="button"
     aria-label="Previous product image"
     data-product-gallery-prev
@@ -122,7 +122,7 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
     ‹
   </button>
   <button
-    class="absolute right-8 top-1/2 z-10 hidden -translate-y-1/2 font-sans text-2xl text-ink transition-opacity hover:opacity-60 disabled:opacity-20 md:block"
+    class="absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center bg-paper/85 font-sans text-3xl leading-none text-ink transition-opacity hover:opacity-60 disabled:hidden md:right-8"
     type="button"
     aria-label="Next product image"
     data-product-gallery-next
@@ -131,23 +131,34 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
     ›
   </button>
 
-  {heroImage && (
-    <img
-      src={imageUrlWithWidth(heroImage.url, 1800)}
-      alt={heroImage.altText ?? "Revenant Edge product image"}
-      width={heroImage.width}
-      height={heroImage.height}
-      class:list={[
-        "h-full w-full object-center p-0 transition-opacity duration-[180ms]",
-        isLifestyleImage(heroImage)
-          ? "object-cover"
-          : "scale-100 object-contain md:scale-[1.18] lg:scale-[1.08]",
-      ]}
-      sizes="(min-width: 1024px) 50vw, 100vw"
-      loading="eager"
-      data-product-gallery-image
-    />
-  )}
+  <div
+    class="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth"
+    data-product-gallery-track
+    tabindex="0"
+    aria-label="Product images"
+  >
+    {galleryPayload.map((image, index) => (
+      <figure
+        class="relative h-full w-full shrink-0 snap-center"
+        data-product-gallery-slide
+      >
+        <img
+          src={image.src}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          class:list={[
+            "h-full w-full object-center p-0",
+            image.display === "cover"
+              ? "object-cover"
+              : "scale-100 object-contain md:scale-[1.18] lg:scale-[1.08]",
+          ]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          loading={index === 0 ? "eager" : "lazy"}
+        />
+      </figure>
+    ))}
+  </div>
 </div>
 
 {fullscreenImageUrl && (
@@ -181,7 +192,9 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
 
 <script>
   const gallery = document.querySelector("[data-product-gallery]");
-  const galleryImage = document.querySelector("[data-product-gallery-image]");
+  const galleryTrack = document.querySelector("[data-product-gallery-track]");
+  /** @type {HTMLElement[]} */
+  const gallerySlides = Array.from(document.querySelectorAll("[data-product-gallery-slide]"));
   const galleryCount = document.querySelector("[data-product-gallery-count]");
   const previousButton = document.querySelector("[data-product-gallery-prev]");
   const nextButton = document.querySelector("[data-product-gallery-next]");
@@ -191,39 +204,61 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
   const closeButton = document.querySelector("[data-product-fullscreen-close]");
   const galleryImages = JSON.parse(gallery?.getAttribute("data-product-gallery-images") ?? "[]");
   let galleryIndex = 0;
+  let scrollFrame = 0;
 
-  function setImageDisplay(image, display) {
-    image.classList.toggle("object-cover", display === "cover");
-    image.classList.toggle("object-contain", display !== "cover");
-    image.classList.toggle("md:scale-[1.18]", display !== "cover");
-    image.classList.toggle("lg:scale-[1.08]", display !== "cover");
-  }
-
-  function renderGalleryImage(index) {
-    if (!galleryImage || galleryImages.length === 0) return;
-    galleryIndex = (index + galleryImages.length) % galleryImages.length;
+  function updateGalleryMeta() {
     const current = galleryImages[galleryIndex];
 
-    galleryImage.setAttribute("src", current.src);
-    galleryImage.setAttribute("alt", current.alt);
-    galleryImage.setAttribute("width", current.width);
-    galleryImage.setAttribute("height", current.height);
-    setImageDisplay(galleryImage, current.display);
+    if (galleryCount && galleryImages.length > 0) {
+      galleryCount.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
+    }
 
-    if (fullscreenImage) {
+    if (fullscreenImage && current) {
       fullscreenImage.setAttribute("src", current.src);
       fullscreenImage.setAttribute("alt", current.alt);
       fullscreenImage.setAttribute("width", current.width);
       fullscreenImage.setAttribute("height", current.height);
     }
-
-    if (galleryCount) {
-      galleryCount.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
-    }
   }
 
-  previousButton?.addEventListener("click", () => renderGalleryImage(galleryIndex - 1));
-  nextButton?.addEventListener("click", () => renderGalleryImage(galleryIndex + 1));
+  function scrollToGalleryImage(index) {
+    if (!galleryTrack || gallerySlides.length === 0) return;
+    galleryIndex = (index + galleryImages.length) % galleryImages.length;
+    galleryTrack.scrollTo({
+      left: gallerySlides[galleryIndex].offsetLeft,
+      behavior: "smooth",
+    });
+    updateGalleryMeta();
+  }
+
+  function syncGalleryIndexFromScroll() {
+    if (!galleryTrack || gallerySlides.length === 0) return;
+
+    window.cancelAnimationFrame(scrollFrame);
+    scrollFrame = window.requestAnimationFrame(() => {
+      const trackCenter = galleryTrack.scrollLeft + galleryTrack.clientWidth / 2;
+      let closestIndex = 0;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      gallerySlides.forEach((slide, index) => {
+        const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+        const distance = Math.abs(trackCenter - slideCenter);
+        if (distance < closestDistance) {
+          closestIndex = index;
+          closestDistance = distance;
+        }
+      });
+
+      if (closestIndex !== galleryIndex) {
+        galleryIndex = closestIndex;
+        updateGalleryMeta();
+      }
+    });
+  }
+
+  previousButton?.addEventListener("click", () => scrollToGalleryImage(galleryIndex - 1));
+  nextButton?.addEventListener("click", () => scrollToGalleryImage(galleryIndex + 1));
+  galleryTrack?.addEventListener("scroll", syncGalleryIndexFromScroll, { passive: true });
 
   function openFullscreen() {
     if (!fullscreen) return;
@@ -247,8 +282,8 @@ const galleryPayload = galleryImages.filter(Boolean).map((image) => ({
     if (event.target === fullscreen) closeFullscreen();
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowLeft") renderGalleryImage(galleryIndex - 1);
-    if (event.key === "ArrowRight") renderGalleryImage(galleryIndex + 1);
+    if (event.key === "ArrowLeft") scrollToGalleryImage(galleryIndex - 1);
+    if (event.key === "ArrowRight") scrollToGalleryImage(galleryIndex + 1);
     if (event.key === "Escape" && fullscreen && !fullscreen.classList.contains("hidden")) {
       closeFullscreen();
     }
