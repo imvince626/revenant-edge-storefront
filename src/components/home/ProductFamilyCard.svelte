@@ -96,8 +96,8 @@
             loading="lazy"
             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             class={[
-              "absolute inset-0 h-full w-full scale-[1.18] object-contain p-[3%] transition-opacity duration-[280ms] md:p-[4%]",
-              hasHover ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.2]",
+              "absolute inset-0 h-full w-full scale-[1.12] object-contain p-[5%] transition-opacity duration-[280ms] md:p-[6%]",
+              hasHover ? "group-hover:opacity-0" : "transition-transform group-hover:scale-[1.14]",
             ].join(" ")}
             style="transition-timing-function: var(--ease-standard);"
           />
@@ -115,7 +115,7 @@
               "absolute inset-0 h-full w-full opacity-0 transition-opacity duration-[280ms] group-hover:opacity-100",
               isLifestyleImage(selectedHoverImage)
                 ? "object-cover p-0"
-                : "scale-[1.18] object-contain p-[3%] md:p-[4%]",
+                : "scale-[1.12] object-contain p-[5%] md:p-[6%]",
             ].join(" ")}
             style="transition-timing-function: var(--ease-standard);"
           />

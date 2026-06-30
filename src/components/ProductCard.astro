@@ -108,11 +108,11 @@ function imgSrc(url: string, width: number) {
         srcset={[450, 600, 800, 1000].map(w => `${imgSrc(primaryImage.url, w)} ${w}w`).join(", ")}
         class:list={[
           "product-card__img product-card__img--primary",
-          "absolute inset-0 h-full w-full scale-[1.18] object-contain p-[3%] md:p-[4%]",
+          "absolute inset-0 h-full w-full scale-[1.12] object-contain p-[5%] md:p-[6%]",
           "transition-opacity duration-[280ms]",
           hasSwap
             ? "group-hover:opacity-0"
-            : "transition-transform group-hover:scale-[1.2]",
+            : "transition-transform group-hover:scale-[1.14]",
         ]}
         style={`transition-timing-function: var(--ease-standard);`}
       />
@@ -131,7 +131,7 @@ function imgSrc(url: string, width: number) {
           "product-card__img product-card__img--secondary absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-[280ms]",
           isLifestyleImage(secondaryImage)
             ? "object-cover p-0"
-            : "scale-[1.18] object-contain p-[3%] md:p-[4%]",
+            : "scale-[1.12] object-contain p-[5%] md:p-[6%]",
         ]}
         style="transition-timing-function: var(--ease-standard);"
       />
