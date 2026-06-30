@@ -6,6 +6,16 @@ export const prerender = false;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const E164_RE = /^\+[1-9]\d{7,14}$/;
 
+function isExistingCustomerError(error: { code?: string; message: string }) {
+  const code = error.code?.toUpperCase() ?? "";
+  const message = error.message ?? "";
+
+  return (
+    code === "TAKEN" ||
+    /already|associated|exists|taken|customer.*account/i.test(message)
+  );
+}
+
 function randomPassword() {
   return `${crypto.randomUUID()}Aa1!`;
 }
@@ -52,9 +62,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     });
 
     const errors = result.customerUserErrors ?? [];
-    const duplicate = errors.some((error) =>
-      /already|taken|exists/i.test(error.message)
-    );
+    const duplicate = errors.some(isExistingCustomerError);
 
     if (result.customer || duplicate) {
       return json(200, { ok: true });
