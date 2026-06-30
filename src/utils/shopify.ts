@@ -42,21 +42,16 @@ const makeShopifyRequest = async (
         `🔴 No buyer IP provided => make sure to pass the buyer IP when making a server side Shopify request.`
       );
 
-    const { privateShopifyAccessToken, publicShopifyAccessToken } = config;
+    const { publicShopifyAccessToken } = config;
     const options = {
       method: "POST",
       headers: {},
       body: JSON.stringify({ query, variables }),
     };
-    // Check if the Shopify request is made from the server or the client
-    if (isSSR) {
-      options.headers = {
-        "Content-Type": "application/json",
-        "Shopify-Storefront-Private-Token": privateShopifyAccessToken,
-        "Shopify-Storefront-Buyer-IP": buyerIP,
-      };
-      return options;
-    }
+
+    // Use the public Storefront token for both SSR and client-side requests.
+    // It is intended for public product/cart storefront access and avoids
+    // relying on platform-specific private secret bindings during deploys.
     options.headers = {
       "Content-Type": "application/json",
       "X-Shopify-Storefront-Access-Token": publicShopifyAccessToken,
