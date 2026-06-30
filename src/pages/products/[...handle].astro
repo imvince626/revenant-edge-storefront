@@ -98,6 +98,7 @@ const colorOptions = product
         : null,
     }))
   : [];
+const showColorSelector = colorOptions.length > 1;
 
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
@@ -245,50 +246,52 @@ const recommendationCollection = isCollection2Product
                 </div>
               )}
 
-              <div class="py-7">
-                <div class="mb-5 flex items-center justify-between">
-                  <div class="flex items-baseline gap-6">
-                    <p class="font-sans text-sm font-semibold text-ink">Color</p>
-                    <sup class="font-sans text-[10px] text-muted">{colorOptions.length}</sup>
-                    <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
+              {showColorSelector && (
+                <div class="py-7">
+                  <div class="mb-5 flex items-center justify-between">
+                    <div class="flex items-baseline gap-6">
+                      <p class="font-sans text-sm font-semibold text-ink">Color</p>
+                      <sup class="font-sans text-[10px] text-muted">{colorOptions.length}</sup>
+                      <p class="font-sans text-sm font-semibold text-muted">{inferredColor}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 overflow-x-auto">
+                    {colorOptions.map((option) => (
+                      <a
+                        href={option.href}
+                        aria-label={`View ${option.color}`}
+                        aria-current={option.active ? "true" : undefined}
+                        class:list={[
+                          "relative flex h-[5.2rem] w-[5.2rem] shrink-0 items-center justify-center bg-paper",
+                        ]}
+                      >
+                        {option.image ? (
+                          <img
+                            src={productImageUrl(option.image.url, 220)}
+                            alt={`${product.title} in ${option.color}`}
+                            width={option.image.width}
+                            height={option.image.height}
+                            loading="lazy"
+                            class="h-full w-full object-contain p-2"
+                          />
+                        ) : (
+                          <span
+                            class="h-8 w-8 rounded-full border border-line"
+                            style={`background-color: ${option.swatch};`}
+                          ></span>
+                        )}
+                      </a>
+                    ))}
+                    <a
+                      href="/collections/shop-all"
+                      class="ml-auto hidden shrink-0 items-center gap-4 px-4 font-sans text-sm font-semibold text-ink md:flex"
+                    >
+                      <span>More Colors</span>
+                      <span class="text-xl leading-none" aria-hidden="true">›</span>
+                    </a>
                   </div>
                 </div>
-                <div class="flex items-center gap-1 overflow-x-auto">
-                  {colorOptions.map((option) => (
-                    <a
-                      href={option.href}
-                      aria-label={`View ${option.color}`}
-                      aria-current={option.active ? "true" : undefined}
-                      class:list={[
-                        "relative flex h-[5.2rem] w-[5.2rem] shrink-0 items-center justify-center bg-paper",
-                      ]}
-                    >
-                      {option.image ? (
-                        <img
-                          src={productImageUrl(option.image.url, 220)}
-                          alt={`${product.title} in ${option.color}`}
-                          width={option.image.width}
-                          height={option.image.height}
-                          loading="lazy"
-                          class="h-full w-full object-contain p-2"
-                        />
-                      ) : (
-                        <span
-                          class="h-8 w-8 rounded-full border border-line"
-                          style={`background-color: ${option.swatch};`}
-                        ></span>
-                      )}
-                    </a>
-                  ))}
-                  <a
-                    href="/collections/shop-all"
-                    class="ml-auto hidden shrink-0 items-center gap-4 px-4 font-sans text-sm font-semibold text-ink md:flex"
-                  >
-                    <span>More Colors</span>
-                    <span class="text-xl leading-none" aria-hidden="true">›</span>
-                  </a>
-                </div>
-              </div>
+              )}
 
               <div class="py-2">
                 <AddToCartForm
