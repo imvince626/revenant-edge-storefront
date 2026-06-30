@@ -2,7 +2,6 @@
 import { getCollectionByHandle } from "../utils/shopify";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HomeMediaPanel from "../components/home/HomeMediaPanel.astro";
-import NewsletterModal from "../components/home/NewsletterModal.svelte";
 import { setCache } from "../utils/cache";
 
 // ── Buyer IP ───────────────────────────────────────────────────────────────────
@@ -81,7 +80,4 @@ const panels = [
       priority={panel.priority}
     />
   ))}
-
-  <NewsletterModal client:idle discount="15%" delayMs={1600} />
-
 </BaseLayout>
