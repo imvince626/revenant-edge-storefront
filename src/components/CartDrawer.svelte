@@ -49,7 +49,7 @@
 {#if $isCartDrawerOpen}
   <!-- Dialog wrapper -->
   <div
-    class="relative z-50"
+    class="relative z-[90]"
     aria-labelledby="cart-drawer-title"
     role="dialog"
     aria-modal="true"

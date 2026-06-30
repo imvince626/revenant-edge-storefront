@@ -4,7 +4,7 @@
   import type { z } from "zod";
   import type { VariantResult, ProductResult } from "../utils/schemas";
 
-  import { addCartItem, isCartUpdating, cart } from "../stores/cart";
+  import { addCartItem, isCartUpdating, cart, isCartDrawerOpen } from "../stores/cart";
   import { trackAddToCart } from "../utils/analytics";
 
   interface Props {
@@ -19,6 +19,7 @@
   let formEl: HTMLFormElement;
   let inlineSubmitEl: HTMLButtonElement;
   let stickyVisible = $state(false);
+  let showStickyCta = $derived(stickyVisible && !$isCartDrawerOpen);
 
   function getInitialVariantId() {
     return initialVariantId;
@@ -202,9 +203,9 @@
   class={[
     "fixed inset-x-0 bottom-0 z-[55] md:hidden",
     "transition-transform duration-[220ms]",
-    stickyVisible ? "translate-y-0" : "pointer-events-none translate-y-full",
+    showStickyCta ? "translate-y-0" : "pointer-events-none translate-y-full",
   ].join(" ")}
-  aria-hidden={!stickyVisible}
+  aria-hidden={!showStickyCta}
 >
   <button
     type="button"
@@ -218,7 +219,7 @@
       "disabled:cursor-not-allowed disabled:opacity-40",
     ].join(" ")}
     disabled={$isCartUpdating || noQuantityLeft || !activeAvailableForSale}
-    tabindex={stickyVisible ? 0 : -1}
+    tabindex={showStickyCta ? 0 : -1}
   >
     {#if $isCartUpdating}
       <svg
