@@ -115,13 +115,15 @@
 <!-- Size / variant selector (only rendered when variants are provided) -->
 {#if variants.length > 1}
   <div class="mb-4">
-    <div class="mb-5 flex items-center justify-between">
+    <div class="mb-5">
       <div class="flex items-center gap-6">
         <p class="font-sans text-sm font-semibold text-ink">Size</p>
       </div>
-      <a href="/pages/size-guide" class="font-sans text-xs font-semibold text-muted underline underline-offset-4">Size Chart</a>
     </div>
-    <div class="grid grid-cols-4 gap-1 md:grid-cols-5">
+    <div
+      class="grid gap-1"
+      style={`grid-template-columns: repeat(${variants.length}, minmax(0, 1fr));`}
+    >
       {#each variants as v}
         <button
           type="button"
@@ -130,7 +132,7 @@
           aria-pressed={selectedVariantId === v.id}
           class={[
             "font-sans text-xs font-semibold",
-            "relative flex h-10 min-w-[3rem] items-center justify-center px-3",
+            "relative flex h-10 min-w-0 items-center justify-center px-1",
             "transition-colors",
             "disabled:cursor-not-allowed disabled:text-faint",
             selectedVariantId === v.id
