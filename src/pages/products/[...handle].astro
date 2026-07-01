@@ -9,7 +9,6 @@ import NotFoundLayout from "../../layouts/NotFoundLayout.astro";
 import AddToCartForm from "../../components/AddToCartForm.svelte";
 import ProductImageGallery from "../../components/ProductImageGallery.astro";
 import ProductInformations from "../../components/ProductInformations.astro";
-import ProductAccordions from "../../components/ProductAccordions.astro";
 import ProductFeatureSplit from "../../components/ProductFeatureSplit.astro";
 import ProductRecommendations from "../../components/ProductRecommendations.astro";
 
@@ -227,24 +226,31 @@ const recommendationCollection = isCollection2Product
                 />
               </div>
 
-              <div class="grid text-ink">
-                {[
-                  ["🇺🇸", "Free shipping over $100"],
-                  ["⌁", "Ships from Los Angeles, CA"],
-                  ["USA", "100% made in USA cotton with screenprinted graphics"],
-                ].map(([icon, title]) => (
-                  <div class="flex items-center justify-between gap-5 bg-paper py-3">
-                    <div class="flex items-center gap-8">
-                      <span class="w-5 text-center font-display text-sm font-bold text-ink" aria-hidden="true">{icon}</span>
-                      <p class="font-sans text-sm font-semibold">{title}</p>
-                    </div>
-                    <span class="font-sans text-lg text-ink" aria-hidden="true">›</span>
-                  </div>
-                ))}
-              </div>
-
-              <div class="mt-8 lg:mt-10">
-                <ProductAccordions />
+              <div class="mt-6 border-t border-line font-sans text-ink">
+                <p class="border-b border-line py-5 text-sm leading-relaxed">
+                  Free standard shipping in US for orders over $100 USD. Exclusions apply.
+                </p>
+                <a
+                  href="#product-quality"
+                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
+                >
+                  <span>Product Details</span>
+                  <span class="text-lg leading-none" aria-hidden="true">›</span>
+                </a>
+                <a
+                  href="/pages/size-guide"
+                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
+                >
+                  <span>Size Guide</span>
+                  <span class="text-lg leading-none" aria-hidden="true">›</span>
+                </a>
+                <a
+                  href="/pages/returns-exchanges-and-refunds"
+                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
+                >
+                  <span>Shipping &amp; Returns</span>
+                  <span class="text-lg leading-none" aria-hidden="true">›</span>
+                </a>
               </div>
             </div>
           </aside>
