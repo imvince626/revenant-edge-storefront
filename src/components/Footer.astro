@@ -19,70 +19,11 @@ const brandLinks = [
   ["Retail", "/retail"],
   ["Terms", "/terms-of-service"],
 ];
-
-const trustpilotUrl = "https://www.trustpilot.com/review/revenantedge.com";
-const trustpilotReviews = [
-  {
-    name: "Vinny Picone",
-    date: "Aug 3, 2025",
-    quote: "Sick designs, quick shipping, and quality merchandise.",
-  },
-  {
-    name: "Xiaoyu Clements",
-    date: "Nov 24, 2024",
-    quote: "The prints are perfect and the artwork is stunning.",
-  },
-];
 ---
 
 <footer class="bg-ink text-paper" data-site-footer>
   <!-- ── Main grid ── -->
   <div class="container py-10 md:py-16">
-    <section
-      id="trustpilot-reviews"
-      class="mb-10 border-b border-paper/10 pb-8 md:mb-16 md:pb-12"
-      aria-labelledby="trustpilot-reviews-heading"
-    >
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
-        <div>
-          <p class="nav-label mb-3 text-paper/70 md:mb-4">Trustpilot</p>
-          <h2
-            id="trustpilot-reviews-heading"
-            class="font-sans text-2xl font-semibold leading-tight text-paper md:text-4xl"
-          >
-            Reviewed by Revenant Edge customers.
-          </h2>
-          <a
-            href={trustpilotUrl}
-            target="_blank"
-            rel="noreferrer"
-            class="mt-4 inline-flex items-center gap-3 font-sans text-sm font-semibold text-paper/70 transition-colors hover:text-paper md:mt-6"
-          >
-            <span class="text-[#00b67a]" aria-hidden="true">★★★★★</span>
-            <span>3.8 TrustScore from 2 reviews</span>
-            <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-
-        <div class="hidden gap-px bg-paper/10 md:grid md:grid-cols-2">
-          {trustpilotReviews.map((review) => (
-            <article class="bg-ink p-5">
-              <div class="flex items-center justify-between gap-4">
-                <h3 class="font-sans text-sm font-semibold text-paper">{review.name}</h3>
-                <span class="font-sans text-xs font-semibold text-[#00b67a]" aria-label="5 out of 5 stars">
-                  ★★★★★
-                </span>
-              </div>
-              <p class="mt-1 font-sans text-xs font-semibold text-paper/40">{review.date}</p>
-              <p class="mt-5 font-sans text-sm font-semibold leading-relaxed text-paper/70">
-                "{review.quote}"
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-
     <div class="grid grid-cols-2 gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-4">
 
       <!-- Brand / wordmark column -->
