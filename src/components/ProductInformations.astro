@@ -5,16 +5,25 @@ import Money from "./Money.svelte";
 
 export interface Props {
   price?: z.infer<typeof MoneyV2Result>;
+  quote?: string | null;
   title: string;
 }
-const { price, title } = Astro.props as Props;
+const { price, quote, title } = Astro.props as Props;
 ---
 
 <div>
   <div class="flex items-start justify-between gap-6">
-    <h1 class="font-sans text-[13px] font-semibold leading-snug text-ink">
-      {title}
-    </h1>
+    <div class="min-w-0">
+      <h1 class="font-sans text-[13px] font-semibold leading-snug text-ink">
+        {title}
+      </h1>
+
+      {quote && (
+        <p class="mt-4 font-sans text-[13px] leading-snug text-muted">
+          {quote}
+        </p>
+      )}
+    </div>
 
     {price && (
       <p class="shrink-0 font-sans text-[13px] font-semibold text-ink">

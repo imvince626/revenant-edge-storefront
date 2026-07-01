@@ -209,7 +209,11 @@ const recommendationCollection = isCollection2Product
 
           <aside class="min-w-0 bg-paper lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto lg:border-l lg:border-line">
             <div class="flex min-h-full min-w-0 flex-col px-4 pb-8 pt-5 md:px-8 lg:px-[7.5vw] lg:py-[14vh]">
-              <ProductInformations title={product.title} price={firstVariant?.price} />
+              <ProductInformations
+                title={product.title}
+                price={firstVariant?.price}
+                quote={productQuote?.quote}
+              />
 
               <div class="pt-6">
                 <AddToCartForm
@@ -222,14 +226,6 @@ const recommendationCollection = isCollection2Product
                   colorLabel={inferredColor}
                 />
               </div>
-
-              {productQuote && (
-                <div class="mt-4 font-sans text-[13px] leading-snug text-muted">
-                  <p>
-                    {productQuote.quote}
-                  </p>
-                </div>
-              )}
 
               <div class="grid text-ink">
                 {[
