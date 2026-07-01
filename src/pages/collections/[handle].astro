@@ -38,7 +38,20 @@ const copyOverrides: Record<string, { title: string; description: string }> = {
     description: "Inspired by Demon Slayer. Designs by Jimmy Wong.",
   },
 };
+const collectionBanners: Record<string, { src: string; alt: string; objectPosition: string }> = {
+  "collection-1-children-of-the-sea": {
+    src: "/images/collection-banners/collection-1-children-of-the-sea.webp",
+    alt: "Model wearing a Revenant Edge Children of the Sea tee",
+    objectPosition: "center center",
+  },
+  "demon-slayer": {
+    src: "/images/collection-banners/collection-2-demon-slayer.webp",
+    alt: "Model wearing a Revenant Edge Demon Slayer inspired tee",
+    objectPosition: "center 42%",
+  },
+};
 const copy = copyOverrides[handle ?? ""];
+const collectionBanner = collectionBanners[handle ?? ""];
 const title = copy?.title ?? rawTitle;
 const description = copy?.description ?? rawDescription;
 const productFamilies = Array.from(
@@ -67,17 +80,44 @@ setCache.short(Astro);
     <NotFoundLayout title="Collection not found" message="Collection not found" />
   ) : (
     <BaseLayout title={`${title} | Revenant Edge`} description={description || `Shop ${title} from Revenant Edge.`} solidHeader={true}>
-      <section class="bg-paper px-5 py-8 md:px-8 md:py-10">
-        <div class="max-w-[88rem]">
-          <h1 class="font-sans text-[15px] font-semibold leading-tight text-ink">
-            {title}
-            <sup class="ml-1 align-super font-sans text-[10px] font-normal text-muted">{displayCount}</sup>
-          </h1>
-          <p class="mt-5 max-w-[64rem] font-sans text-[13px] leading-relaxed text-ink">
-            {collectionStory}
-          </p>
-        </div>
-      </section>
+      {collectionBanner ? (
+        <section class="relative border-b border-line bg-ink">
+          <div class="relative min-h-[430px] overflow-hidden md:min-h-[460px] lg:min-h-[520px]">
+            <img
+              src={collectionBanner.src}
+              alt={collectionBanner.alt}
+              class="absolute inset-0 h-full w-full object-cover"
+              style={`object-position: ${collectionBanner.objectPosition};`}
+              loading="eager"
+              decoding="async"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/5"></div>
+            <div class="absolute inset-x-0 bottom-0 px-5 py-6 md:px-8 md:py-8">
+              <div class="max-w-[56rem] text-paper">
+                <h1 class="font-sans text-[24px] font-semibold leading-tight tracking-normal md:text-[36px] lg:text-[46px]">
+                  {title}
+                  <sup class="ml-2 align-super font-sans text-[10px] font-normal text-paper/75 md:text-[13px]">{displayCount}</sup>
+                </h1>
+                <p class="mt-3 max-w-[44rem] font-sans text-[13px] font-semibold leading-relaxed text-paper md:text-[15px]">
+                  {collectionStory}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section class="bg-paper px-5 py-8 md:px-8 md:py-10">
+          <div class="max-w-[88rem]">
+            <h1 class="font-sans text-[15px] font-semibold leading-tight text-ink">
+              {title}
+              <sup class="ml-1 align-super font-sans text-[10px] font-normal text-muted">{displayCount}</sup>
+            </h1>
+            <p class="mt-5 max-w-[64rem] font-sans text-[13px] leading-relaxed text-ink">
+              {collectionStory}
+            </p>
+          </div>
+        </section>
+      )}
 
       <section class="bg-paper px-5 pb-8 pt-2 md:px-8">
         <div class="flex items-center justify-between">
