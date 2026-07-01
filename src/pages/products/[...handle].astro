@@ -58,6 +58,30 @@ const inferredColor = product
     ].filter(Boolean).join(" "))
   : "Black";
 
+const formatTitleCase = (value: string) =>
+  value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+const productTitleForMeta = product
+  ? (() => {
+      const slashParts = product.title.split(/\s*\/\s*/).filter(Boolean);
+      if (slashParts.length > 1) {
+        return slashParts.join(" - ");
+      }
+
+      const colorFromHandle = product.handle.match(
+        /-(black|white|cream|grey|gray|navy|red|blue|green|purple|brown)$/i,
+      )?.[1];
+
+      return colorFromHandle
+        ? `${product.title} - ${formatTitleCase(colorFromHandle)}`
+        : product.title;
+    })()
+  : "";
+
 // ── JSON-LD + view_item data (computed server-side, product is known to exist here) ──
 const pdpProduct = product
   ? {
@@ -171,7 +195,7 @@ const recommendationCollection = isCollection2Product
   !product ? (
     <NotFoundLayout title="Product not found" message="Product not found" />
   ) : (
-    <BaseLayout title={product.title} solidHeader={true}>
+    <BaseLayout title={`${productTitleForMeta} | Revenant Edge`} solidHeader={true}>
       <!-- JSON-LD Product schema (SSR, for Google Shopping) -->
       {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
 

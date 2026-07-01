@@ -16,18 +16,14 @@ interface Props {
 
 const { solidFromTop = false } = Astro.props;
 
-const featuredLinks = [
-  { label: "Children of the Sea", href: "/collections/collection-1-children-of-the-sea" },
-  { label: "Demon Slayer", href: "/collections/demon-slayer" },
-  { label: "Lookbook", href: "/blogs/lookbook" },
-];
-
 const collectionLinks = [
   { label: "Shop Children of the Sea", href: "/collections/collection-1-children-of-the-sea" },
   { label: "Shop Demon Slayer", href: "/collections/demon-slayer" },
   { label: "Lookbook", href: "/blogs/lookbook" },
   { label: "Behind the Brand", href: "/about" },
 ];
+
+const contactLink = { label: "Contact", href: "/contact" };
 ---
 
 <header
@@ -46,33 +42,17 @@ const collectionLinks = [
         <a href="/collections/shop-all" class="nav-label header-nav-link header-nav-link--active">Shop</a>
         <div class="mega-menu" aria-label="Shop menu">
           <div class="mega-menu__inner">
-            <div class="mega-menu__links">
+            <nav class="mega-menu__links" aria-label="Shop menu links">
               <div class="grid gap-5">
-                {featuredLinks.map((link) => (
-                  <a href={link.href} class="mega-menu__featured-link">{link.label}</a>
+                {collectionLinks.map((link) => (
+                  <a href={link.href} class="mega-menu__sub-link">
+                    <span>{link.label}</span>
+                    <span aria-hidden="true">›</span>
+                  </a>
                 ))}
               </div>
-
-              <div class="mt-20">
-                <div class="grid gap-5">
-                  {collectionLinks.map((link) => (
-                    <a href={link.href} class="mega-menu__sub-link">
-                      <span>{link.label}</span>
-                      {["Shop Children of the Sea", "Shop Demon Slayer"].includes(link.label) && (
-                        <span aria-hidden="true">›</span>
-                      )}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <a href="/collections/collection-1-children-of-the-sea" class="mega-menu__preview">
-              <img src="/hero-loop-poster.jpg" alt="Children of the Sea collection preview" loading="eager" />
-              <div class="mega-menu__preview-copy">
-                <h2>Children of the Sea Collection</h2>
-              </div>
-            </a>
+              <a href={contactLink.href} class="mega-menu__contact">{contactLink.label}</a>
+            </nav>
           </div>
         </div>
       </div>
@@ -232,27 +212,14 @@ const collectionLinks = [
   }
 
   .mega-menu__inner {
-    display: grid;
-    grid-template-columns: minmax(22rem, 30vw) 1fr;
-    min-height: min(72vh, 48rem);
-  }
-
-  .mega-menu__links {
-    border-right: 1px solid var(--color-line);
+    max-width: 34rem;
     padding: 3.25rem 2rem 4rem;
   }
 
-  .mega-menu__featured-link {
+  .mega-menu__links {
     display: block;
-    font-family: var(--font-display);
-    font-size: clamp(1.55rem, 2.4vw, 2.15rem);
-    font-weight: 700;
-    letter-spacing: 0;
-    line-height: 1;
-    transition: opacity 160ms var(--ease-standard);
   }
 
-  .mega-menu__featured-link:hover,
   .mega-menu__sub-link:hover {
     opacity: 0.55;
   }
@@ -269,47 +236,27 @@ const collectionLinks = [
     transition: opacity 160ms var(--ease-standard);
   }
 
-  .mega-menu__preview {
-    position: relative;
-    display: block;
-    min-height: 100%;
-    overflow: hidden;
-    background: var(--color-surface);
-  }
-
-  .mega-menu__preview img {
-    height: 100%;
-    min-height: min(72vh, 48rem);
-    width: 100%;
-    object-fit: cover;
-    transition: transform 400ms var(--ease-standard);
-  }
-
-  .mega-menu__preview:hover img {
-    transform: scale(1.025);
-  }
-
-  .mega-menu__preview::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(10,10,10,0.5), transparent 46%);
-  }
-
-  .mega-menu__preview-copy {
-    position: absolute;
-    bottom: 2rem;
-    left: 2rem;
-    z-index: 1;
+  .mega-menu__contact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2.25rem;
+    min-width: 9rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    background: var(--color-ink);
     color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+    transition: opacity 160ms var(--ease-standard);
   }
 
-  .mega-menu__preview-copy h2 {
-    font-family: var(--font-display);
-    font-size: clamp(1.4rem, 2vw, 2.4rem);
-    font-weight: 700;
-    letter-spacing: 0;
-    line-height: 1;
+  .mega-menu__contact:hover {
+    opacity: 0.72;
   }
 
   @media (max-width: 767px) {

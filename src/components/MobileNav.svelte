@@ -31,14 +31,20 @@
   }
 </script>
 
-<!-- Hamburger trigger -->
+<!-- Mobile menu trigger -->
 <button
-  class="flex h-10 items-center justify-center text-current transition-opacity hover:opacity-60"
+  class="grid h-10 w-10 place-items-center text-current transition-opacity hover:opacity-60"
   aria-label="Open navigation menu"
   aria-expanded={isOpen}
+  aria-haspopup="dialog"
   onclick={open}
 >
-  <span class="nav-label">Shop</span>
+  <span class="sr-only">Open navigation menu</span>
+  <span class="flex h-[18px] w-[22px] flex-col justify-between" aria-hidden="true">
+    <span class="block h-[2px] w-full bg-current"></span>
+    <span class="block h-[2px] w-full bg-current"></span>
+    <span class="block h-[2px] w-full bg-current"></span>
+  </span>
 </button>
 
 {#if isOpen}
