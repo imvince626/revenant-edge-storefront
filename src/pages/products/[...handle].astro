@@ -230,13 +230,23 @@ const recommendationCollection = isCollection2Product
                 <p class="border-b border-line py-5 text-sm leading-relaxed">
                   Free standard shipping in US for orders over $100 USD. Exclusions apply.
                 </p>
-                <a
-                  href="#product-quality"
-                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
-                >
-                  <span>Product Details</span>
-                  <span class="text-lg leading-none" aria-hidden="true">›</span>
-                </a>
+                <details open class="group border-b border-line">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-sm font-semibold uppercase [&::-webkit-details-marker]:hidden">
+                    <span>Product Details</span>
+                    <span class="text-lg leading-none transition-transform group-open:rotate-90" aria-hidden="true">›</span>
+                  </summary>
+                  <div class="pb-5 pr-6 font-sans text-sm leading-relaxed text-muted">
+                    <p>
+                      100% hand made in Los Angeles, California. Custom designed by artist Jimmy Wong on a premium heavyweight 100% USA cotton t-shirt with a thick screenprinted front and back graphic.
+                    </p>
+                    <ul class="mt-4 space-y-2">
+                      <li>Premium heavyweight Revenant Edge blank t-shirt</li>
+                      <li>Heavy screenprint on back and front</li>
+                      <li>Oversized fit</li>
+                      <li>Made in USA</li>
+                    </ul>
+                  </div>
+                </details>
                 <a
                   href="/pages/size-guide"
                   class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
