@@ -219,9 +219,6 @@
       "font-sans text-sm font-semibold uppercase",
       "flex w-full items-center justify-center gap-3",
       "h-[52px] bg-ink text-paper px-8",
-      "transition-[transform,box-shadow] duration-[180ms]",
-      "hover:-translate-y-px hover:shadow-[inset_0_0_0_1px_var(--color-ink),0_10px_22px_rgba(10,10,10,0.18)]",
-      "active:translate-y-0 active:shadow-none",
       "focus:ring-2 focus:ring-ink focus:ring-offset-2 focus:outline-none",
       "disabled:cursor-not-allowed disabled:opacity-40",
     ].join(" ")}
@@ -276,8 +273,6 @@
       "font-sans text-sm font-semibold uppercase",
       "flex h-14 w-full items-center justify-center gap-3",
       "bg-ink px-8 text-paper",
-      "transition-[transform,box-shadow] duration-[180ms]",
-      "active:translate-y-0 active:shadow-none",
       "disabled:cursor-not-allowed disabled:opacity-40",
     ].join(" ")}
     disabled={$isCartUpdating || noQuantityLeft || !activeAvailableForSale}
