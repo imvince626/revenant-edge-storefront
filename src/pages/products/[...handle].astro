@@ -30,34 +30,6 @@ const firstVariant = product?.variants.nodes[0];
 const allVariants = product?.variants.nodes ?? [];
 setCache.short(Astro);
 
-const colorSwatches: Record<string, string> = {
-  black: "#0A0A0A",
-  white: "#FFFFFF",
-  cobalt: "#2747B8",
-  storm: "#777D88",
-  mushroom: "#B9AC9B",
-  ash: "#D3D3D3",
-  cream: "#E8E1D2",
-};
-function inferColor(input = "") {
-  const source = input.toLowerCase();
-  const color = Object.keys(colorSwatches).find((name) => {
-    const pattern = new RegExp(`(^|[^a-z])${name}([^a-z]|$)`, "i");
-    return pattern.test(source);
-  });
-
-  return color ? color[0].toUpperCase() + color.slice(1) : "Black";
-}
-
-const inferredColor = product
-  ? inferColor([
-      product.title,
-      product.handle,
-      product.featuredImage?.altText,
-      product.featuredImage?.url,
-    ].filter(Boolean).join(" "))
-  : "Black";
-
 const formatTitleCase = (value: string) =>
   value
     .split(/[-_\s]+/)
@@ -223,7 +195,6 @@ const recommendationCollection = isCollection2Product
                   variantAvailableForSale={firstVariant?.availableForSale ?? false}
                   variants={allVariants}
                   product={product}
-                  colorLabel={inferredColor}
                 />
               </div>
 

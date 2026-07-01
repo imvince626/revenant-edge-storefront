@@ -13,7 +13,6 @@
     variantAvailableForSale: boolean;
     variants?: z.infer<typeof VariantResult>[];
     product?: z.infer<typeof ProductResult>;
-    colorLabel?: string;
   }
 
   let {
@@ -22,7 +21,6 @@
     variantAvailableForSale: initialAvailable,
     variants = [],
     product = null,
-    colorLabel = "",
   }: Props = $props();
   let formEl: HTMLFormElement;
   let inlineSubmitEl: HTMLButtonElement;
@@ -192,18 +190,6 @@
           {v.title}
         </button>
       {/each}
-    </div>
-  </div>
-{/if}
-
-{#if colorLabel}
-  <div class="mb-5">
-    <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-ink">Color</p>
-    <div
-      class="inline-flex h-11 min-w-32 items-center justify-center bg-ink px-5 font-sans text-xs font-semibold uppercase tracking-normal text-paper"
-      aria-label={`Color: ${colorLabel}`}
-    >
-      {colorLabel}
     </div>
   </div>
 {/if}
