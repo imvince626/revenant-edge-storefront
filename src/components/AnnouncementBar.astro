@@ -1,7 +1,58 @@
 ---
 const message = "FREE SHIPPING ON ALL ORDERS OVER $100";
+const storageKey = "revenant-edge-announcement-dismissed";
 ---
 
-<div class="bg-ink text-paper flex min-h-[34px] items-center justify-center px-4 py-2" style="--announcement-bar-height: 34px;">
-  <p class="nav-label">{message}</p>
+<div
+  class="announcement-bar flex min-h-[22px] items-center justify-center bg-ink px-9 py-1 text-paper"
+  data-announcement-bar
+  data-storage-key={storageKey}
+>
+  <p class="font-sans text-[9px] font-bold uppercase leading-none tracking-[0.08em] md:text-[10px]">
+    {message}
+  </p>
+  <button
+    type="button"
+    class="announcement-bar__close absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center text-paper/70 transition-colors hover:text-paper"
+    aria-label="Dismiss announcement"
+    data-announcement-close
+  >
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <path d="M1 1l8 8M9 1 1 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" />
+    </svg>
+  </button>
 </div>
+
+<style>
+  :root {
+    --announcement-bar-height: 22px;
+  }
+
+  .announcement-bar {
+    position: relative;
+  }
+
+  .announcement-bar.is-hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  const announcementBar = document.querySelector("[data-announcement-bar]");
+  const announcementClose = announcementBar?.querySelector("[data-announcement-close]");
+  const storageKey = announcementBar?.getAttribute("data-storage-key") || "revenant-edge-announcement-dismissed";
+
+  function hideAnnouncement() {
+    announcementBar?.classList.add("is-hidden");
+    document.documentElement.style.setProperty("--announcement-bar-height", "0px");
+  }
+
+  if (localStorage.getItem(storageKey) === "1") {
+    hideAnnouncement();
+  }
+
+  announcementClose?.addEventListener("click", () => {
+    localStorage.setItem(storageKey, "1");
+    hideAnnouncement();
+  });
+</script>
