@@ -219,20 +219,28 @@ const recommendationCollection = isCollection2Product
                     </ul>
                   </div>
                 </details>
-                <a
-                  href="/pages/size-guide"
-                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
-                >
-                  <span>Size Guide</span>
-                  <span class="text-lg leading-none" aria-hidden="true">›</span>
-                </a>
-                <a
-                  href="/pages/returns-exchanges-and-refunds"
-                  class="flex items-center justify-between gap-5 border-b border-line py-5 text-sm font-semibold uppercase"
-                >
-                  <span>Shipping &amp; Returns</span>
-                  <span class="text-lg leading-none" aria-hidden="true">›</span>
-                </a>
+                <details class="group border-b border-line">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-sm font-semibold uppercase [&::-webkit-details-marker]:hidden">
+                    <span>Size Guide</span>
+                    <span class="text-lg leading-none transition-transform group-open:rotate-90" aria-hidden="true">›</span>
+                  </summary>
+                  <div class="pb-5 pr-6 font-sans text-sm leading-relaxed text-muted">
+                    <p>
+                      Oversized fit with a relaxed body and dropped shoulder. Take your normal size for a loose streetwear fit, or size down for a cleaner fit.
+                    </p>
+                  </div>
+                </details>
+                <details class="group border-b border-line">
+                  <summary class="flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-sm font-semibold uppercase [&::-webkit-details-marker]:hidden">
+                    <span>Shipping &amp; Returns</span>
+                    <span class="text-lg leading-none transition-transform group-open:rotate-90" aria-hidden="true">›</span>
+                  </summary>
+                  <div class="pb-5 pr-6 font-sans text-sm leading-relaxed text-muted">
+                    <p>
+                      Ships from Los Angeles, CA. Free standard shipping on U.S. orders over $100. Unworn items can be returned or exchanged within 14 days.
+                    </p>
+                  </div>
+                </details>
               </div>
             </div>
           </aside>
