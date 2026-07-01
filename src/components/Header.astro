@@ -39,8 +39,23 @@ const contactLink = { label: "Contact", href: "/contact" };
 
     <nav class="hidden flex-1 items-center gap-4 lg:gap-6 md:flex" aria-label="Primary navigation">
       <div class="mega-trigger" data-mega-trigger>
-        <a href="/collections/shop-all" class="nav-label header-nav-link header-nav-link--active">Shop</a>
-        <div class="mega-menu" aria-label="Shop menu">
+        <button
+          type="button"
+          class="header-menu-button"
+          aria-label="Open shop menu"
+          aria-controls="desktop-shop-menu"
+          aria-expanded="false"
+          aria-haspopup="true"
+          data-mega-menu-button
+        >
+          <span class="sr-only">Open shop menu</span>
+          <span class="header-menu-button__bars" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+        <div id="desktop-shop-menu" class="mega-menu" aria-label="Shop menu">
           <div class="mega-menu__inner">
             <nav class="mega-menu__links" aria-label="Shop menu links">
               <div class="grid gap-5">
@@ -158,6 +173,40 @@ const contactLink = { label: "Contact", href: "/contact" };
     opacity: 0.8;
   }
 
+  .header-menu-button {
+    display: grid;
+    height: 2.75rem;
+    width: 2.75rem;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    transition: opacity 180ms var(--ease-standard);
+  }
+
+  .header-menu-button:hover,
+  .header-menu-button:focus-visible {
+    opacity: 0.72;
+  }
+
+  .header-menu-button__bars {
+    display: flex;
+    height: 18px;
+    width: 24px;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .header-menu-button__bars span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: currentColor;
+  }
+
   .mega-trigger {
     display: flex;
     height: 4rem;
@@ -268,21 +317,27 @@ const contactLink = { label: "Contact", href: "/contact" };
 
 <script>
   document.querySelectorAll("[data-mega-trigger]").forEach((trigger) => {
+    const button = trigger.querySelector("[data-mega-menu-button]");
     let openTimer;
     let closeTimer;
 
-    function openMenu() {
-      window.clearTimeout(closeTimer);
-      openTimer = window.setTimeout(() => {
-        trigger.classList.add("is-open");
-      }, 60);
+    function setOpen(isOpen) {
+      trigger.classList.toggle("is-open", isOpen);
+      button?.setAttribute("aria-expanded", isOpen ? "true" : "false");
     }
 
-    function closeMenu() {
+    function openMenu(delay = 60) {
+      window.clearTimeout(closeTimer);
+      openTimer = window.setTimeout(() => {
+        setOpen(true);
+      }, delay);
+    }
+
+    function closeMenu(delay = 260) {
       window.clearTimeout(openTimer);
       closeTimer = window.setTimeout(() => {
-        trigger.classList.remove("is-open");
-      }, 260);
+        setOpen(false);
+      }, delay);
     }
 
     trigger.addEventListener("pointerenter", openMenu);
@@ -290,6 +345,23 @@ const contactLink = { label: "Contact", href: "/contact" };
     trigger.addEventListener("focusin", openMenu);
     trigger.addEventListener("focusout", (event) => {
       if (!trigger.contains(event.relatedTarget)) closeMenu();
+    });
+
+    button?.addEventListener("click", () => {
+      window.clearTimeout(openTimer);
+      window.clearTimeout(closeTimer);
+      setOpen(!trigger.classList.contains("is-open"));
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (!trigger.contains(event.target)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        button?.focus();
+      }
     });
   });
 </script>
