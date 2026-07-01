@@ -12,6 +12,7 @@ import ProductInformations from "../../components/ProductInformations.astro";
 import ProductFeatureSplit from "../../components/ProductFeatureSplit.astro";
 import ProductRecommendations from "../../components/ProductRecommendations.astro";
 import TrustpilotReviews from "../../components/TrustpilotReviews.astro";
+import BrandStoryBand from "../../components/BrandStoryBand.astro";
 
 const { handle } = Astro.params;
 if (handle && /-white$/i.test(handle)) {
@@ -279,6 +280,7 @@ const recommendationCollection = isCollection2Product
         ctaLabel={recommendationCollection.ctaLabel}
       />
       <TrustpilotReviews />
+      <BrandStoryBand />
     </BaseLayout>
   )
 }

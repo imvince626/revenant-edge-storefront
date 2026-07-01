@@ -1,7 +1,6 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import BrandStoryBand from "../components/BrandStoryBand.astro";
 import CartDrawer from "../components/CartDrawer.svelte";
 import AnnouncementBar from "../components/AnnouncementBar.astro";
 import "@fontsource-variable/archivo";
@@ -73,7 +72,6 @@ const gtmId = import.meta.env.PUBLIC_GTM_ID;
     <main>
       <slot />
     </main>
-    <BrandStoryBand />
     <Footer />
   </body>
 </html>
