@@ -17,6 +17,8 @@ export interface Props {
   media?: PanelMedia;
   eyebrow?: string;
   title: string;
+  body?: string;
+  signature?: string;
   cta?: PanelCta;
   align?: "bottom-left" | "bottom-center";
   priority?: boolean;
@@ -24,8 +26,9 @@ export interface Props {
 
 const {
   media,
-  eyebrow,
   title,
+  body,
+  signature,
   cta,
   align = "bottom-left",
   priority = false,
@@ -87,15 +90,24 @@ const innerClass = align === "bottom-center"
       <h2 class="m-0 font-display text-[clamp(1.34rem,2.5vw,2.15rem)] font-bold leading-[1.05] tracking-normal text-paper">
         {title}
       </h2>
+      {body && (
+        <p class="mt-5 font-sans text-base font-semibold leading-relaxed text-paper/85 md:text-lg">
+          {body}
+        </p>
+      )}
+      {signature && (
+        <p class="mt-5 font-sans text-sm font-semibold text-paper/75">
+          {signature}
+        </p>
+      )}
       {cta && (
         <a
           href={cta.href}
-          class="home-panel-cta group mt-6 inline-grid min-h-[3.05rem] place-items-center overflow-hidden px-7 font-display text-[0.72rem] font-semibold uppercase text-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
+          class="home-panel-cta mt-6 inline-flex min-h-[3.05rem] w-fit items-center justify-center px-7 font-display text-[0.72rem] font-semibold uppercase text-paper focus:outline-none focus:ring-2 focus:ring-paper focus:ring-offset-2 focus:ring-offset-ink"
           style="background-color: color-mix(in srgb, var(--color-muted) 78%, var(--color-ink));"
           aria-label={cta.label}
         >
-          <span class="home-panel-cta__label home-panel-cta__label--top">{cta.label}</span>
-          <span class="home-panel-cta__label home-panel-cta__label--bottom" data-label={cta.label} aria-hidden="true"></span>
+          {cta.label}
         </a>
       )}
     </div>
@@ -123,29 +135,5 @@ const innerClass = align === "bottom-center"
     transition:
       background-color var(--duration-standard) var(--ease-standard),
       color var(--duration-standard) var(--ease-standard);
-  }
-
-  .home-panel-cta__label {
-    grid-area: 1 / 1;
-    transition: transform var(--duration-standard) var(--ease-standard);
-    will-change: transform;
-  }
-
-  .home-panel-cta__label--bottom {
-    transform: translateY(175%);
-  }
-
-  .home-panel-cta__label--bottom::before {
-    content: attr(data-label);
-  }
-
-  .home-panel-cta:hover .home-panel-cta__label--top,
-  .home-panel-cta:focus-visible .home-panel-cta__label--top {
-    transform: translateY(-175%);
-  }
-
-  .home-panel-cta:hover .home-panel-cta__label--bottom,
-  .home-panel-cta:focus-visible .home-panel-cta__label--bottom {
-    transform: translateY(0);
   }
 </style>
